@@ -12,6 +12,18 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <sys/time.h>
+#include <signal.h>
+#include <event.h>
+#include <event2/buffer.h>
+#include <event2/bufferevent.h>
+#include <event2/listener.h>
+#include <sys/wait.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <semaphore.h>
+
 #define ERR_EXIT(m) \
  do { \
     perror(m); \
