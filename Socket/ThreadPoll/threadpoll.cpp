@@ -29,3 +29,40 @@ ThreadPool <T>::~ThreadPool() {
     delete [] threads;
     stop = true;
 }
+template <typename T>
+bool ThreadPool<T>::Append(T * request) {
+    lw_queue.lock();
+    if(w_queue.size() > num_max_pthread) {
+        lw_queue.unlock();
+        return false;
+    }
+    w_queue.push_back(request);
+    lw_queue.unlock();
+    stat.post();
+    return true;
+}
+template <typename T>
+void * ThreadPool <T>::worker(void * arg) {
+    ThreadPool * pool = (ThreadPool *)arg;
+    pool->run();
+    return pool;
+}
+template <typename T>
+void ThreadPool<T>::run() {
+    while(!stop) {
+        stat.wait();
+        lw_queue.lock();
+        if(w_queue.empty()) {
+            w_queue.unlock();
+            continue;
+        }
+        T * request = w_queue.front();
+        
+        w_queue.pop_front();
+        lw_queue.unlock();
+        
+        if(!request) {
+            continue;
+        }
+    }
+}
