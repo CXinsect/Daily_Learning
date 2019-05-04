@@ -19,6 +19,7 @@ void add_fd(int epollfd,int fd,bool enable) {
         event.events |= EPOLLONESHOT;
     }
     epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
+    set_noblock(fd);
 }
 
 int create_listenfd(int epollfd,int port,const char * ip) {
