@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/epoll.h>
+#include <poll.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -21,7 +22,11 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
+#include <vector>
+#include <map>
 #include <assert.h>
-#include<boost/noncopyable.hpp>
-#include<boost/implicit_cast.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/implicit_cast.hpp>
+#include <boost/scoped_ptr.hpp>
 #endif
