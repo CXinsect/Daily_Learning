@@ -24,3 +24,10 @@ void EventLoop::updateChannel(Channel * channel) {
 void EventLoop::quit() {
     quit_ = true;
 }
+// void EventLoop::removeChannel(Channel * channel_) {
+//     assert(channel_->owerLoop() == this);
+//     if(eventHanding_) {
+//         assert(std::find(activeChannels_.begin(),activeChannels_.end(),channel_) == activeChannels_.end());
+//     }
+//     poller_->removeChannel(channel_);
+// }

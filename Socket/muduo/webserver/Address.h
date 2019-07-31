@@ -9,7 +9,7 @@ class Address {
     public:
         explicit Address (short port = 0,bool loopbackOnly = false);
         Address (std::string &ip,short port);
-        explicit Address (struct sockaddr_in &addr) : 
+        explicit Address (const struct sockaddr_in &addr) : 
                         addr_(addr) {}
         //  sa_family_t family () const { return addr_.sin_family; }
         const struct sockaddr* getSockAddr () const {

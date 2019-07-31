@@ -9,14 +9,17 @@ class EventLoop {
     public:
         EventLoop() : looping_(false),
                         quit_(false),
+                        eventHanding_(false),
                         poller_(Poller::newDefaultPoller(this)) {};
         ~EventLoop() {};
         void updateChannel(Channel * channel);
+        void removeChannel(Channel * channel);
         void loop();
         void quit();
     private:
         bool looping_;
         bool quit_;
+        bool eventHanding_;
         std::shared_ptr <Poller> poller_;
         // Poller  poller_;
         typedef std::vector<Channel *> ChannelList;

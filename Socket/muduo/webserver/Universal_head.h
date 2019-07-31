@@ -29,4 +29,21 @@
 #include <boost/noncopyable.hpp>
 #include <boost/implicit_cast.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+
+class TcpConnection;
+typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
+
+typedef std::function<void ( TcpConnectionPtr&)> ConnectionCallBack;
+// typedef std::function<void (const TcpConnectionPtr&,
+        //                             const char*buf,int len)> MessageCallBack;
+typedef void (*MessageCallBack)(const TcpConnectionPtr&,
+                                const char * buf,
+                                int n);
+
+typedef std::function<void (const TcpConnectionPtr&)> CloseCallBack;
+typedef std::function<void (const TcpConnectionPtr&)> WriteCompleteCallback;
+
 #endif

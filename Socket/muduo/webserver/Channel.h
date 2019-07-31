@@ -1,5 +1,6 @@
 #ifndef _EVENTLOOP_H_
 #define _EVENTLOOP_H_
+#include "Universal_head.h"
 #include <functional>
 class EventLoop;
 
@@ -19,7 +20,9 @@ class Channel {
         void setErrCallBack(const EventCallBack &cb) {
             errCallBack_ = cb;
         }
-
+        void setCloseCallBack(const EventCallBack &cb) {
+            closeCallBack_ = cb;
+        }
         int getFd() { return fd_; }
 
         int getEvents() const { return events_; }
@@ -28,11 +31,13 @@ class Channel {
         void enableReading () { events_ |= ReadEvent;update(); }
         void enableWriteing () { events_ |= WriteEvent;update(); } 
         void disableWriteing () { events_ &= ~WriteEvent;update(); }  
-
+        void disableAll() { events_ = NoneEvent; update(); }
+        
         int getIndex() { return index_; }
 
         void setIndex(int id) { index_ = id; }
         EventLoop *owerLoop () { return loop_; }
+        ~Channel() { assert(!eventHanding_); }
 
     private:
         void update();
@@ -50,5 +55,7 @@ class Channel {
         EventCallBack readCallBack_;
         EventCallBack writeCallBack_;
         EventCallBack errCallBack_;
+        EventCallBack closeCallBack_;
+        bool eventHanding_;
 };
 #endif

@@ -99,12 +99,16 @@ int sockets::getSocketError(int sockfd) {
     else 
         return optval;
 }
+struct sockaddr * sockets::sockaddr_tran(struct sockaddr_in *addr) {
+    struct sockaddr *addr_ = static_cast<struct sockaddr *>(boost::implicit_cast<void*>(addr));
+    return addr_;
+}
 struct sockaddr_in sockets::getLocalAddr(int sockfd) {
     struct sockaddr_in localaddr;
     memset(&localaddr,0,sizeof(localaddr));
     socklen_t addrlen = static_cast <socklen_t> (sizeof(localaddr));
-    struct sockaddr *addr = static_cast<struct sockaddr*>(boost::implicit_cast<void*>(&localaddr));
-    if(::getsockname(sockfd,addr,&addrlen) < 0) {
+    // struct sockaddr *addr = static_cast<struct sockaddr*>(boost::implicit_cast<void*>(&localaddr));
+    if(::getsockname(sockfd,sockaddr_tran(&localaddr),&addrlen) < 0) {
         myError("getsockname",__LINE__);
     }
     return localaddr;
@@ -113,8 +117,8 @@ struct sockaddr_in sockets::getPeerAddr(int sockfd) {
     struct sockaddr_in peerAddr;
     memset(&peerAddr,0,sizeof(peerAddr));
     socklen_t addrlen = static_cast <socklen_t>(sizeof(peerAddr));
-    struct sockaddr *addr = static_cast<struct sockaddr*>(boost::implicit_cast<void*>(&peerAddr));
-    if(::getpeername(sockfd,addr,&addrlen) < 0) 
+    // struct sockaddr *addr = static_cast<struct sockaddr*>(boost::implicit_cast<void*>(&peerAddr));
+    if(::getpeername(sockfd,sockaddr_tran(&peerAddr),&addrlen) < 0) 
         myError("getsockname",__LINE__);
     return peerAddr;
 }

@@ -3,10 +3,8 @@
 #include "SocketOpts.cc"
 #include "Acceptor.cc"
 using namespace sockets;
-void newConnection(int sockfd,const Address &perrAddr) {
-   std::cout << "NewConnection" << perrAddr.toIpPort().c_str() << std::endl;
-    ::write(sockfd,"hello world\n",13);
-    sockets::close(sockfd);
+void onConnection(TcpConnectionPtr &conn) {
+    if(conn->connected)
 }
 int main (void) {
     printf("main pid: %d\n",getpid());

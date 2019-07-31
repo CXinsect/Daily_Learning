@@ -23,6 +23,7 @@ namespace sockets {
     void myError (const char *err_string,int line);
     struct sockaddr_in getLocalAddr(int sockfd);
     struct sockaddr_in getPeerAddr(int sockfd);
+    struct sockaddr* sockaddr_tran(struct sockaddr_in *addr);
     bool isSelfConnection(int sockfd);
 }
 #endif
