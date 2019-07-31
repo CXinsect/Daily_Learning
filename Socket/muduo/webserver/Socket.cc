@@ -1,7 +1,7 @@
 #include "Socket.h"
 #include "Address.h"
 #include "SocketOpts.h"
-Socket::~Socket() { close(sockfd); }
+Socket::~Socket() { ::close(sockfd); }
 
 void Socket::bindAddress(const Address &addr) {
     sockets::Bind(sockfd,addr.getSockAddr());

@@ -1,6 +1,11 @@
 #include "Poller.h"
 #include "Channel.h"
 
+// Poller * newDefaultPoller(EventLoop * loop) {
+//     Poller *p;
+//     p->setEventLoop(loop);
+//     return p;
+// }
 Poller::Poller(EventLoop *loop) : owerLoop_(loop) {}
 
 Poller::~Poller() {};
@@ -38,16 +43,20 @@ void Poller::fillActiveChannels (int numEvents,ChannelList *activeChannels) cons
 void Poller::updateChannel(Channel *channel) {
     std::cout << "fd= " << channel->getFd() << "events= " << channel->getEvents() << std::endl;
     //如果是新事件则加入事件列表
-    if(channel->getEvents() > 0) {
+    if(channel->getIndex() < 0) {
+        std::cout << "ddddddddeeee" << std::endl;
         assert(channels_.find(channel->getFd()) == channels_.end());
         struct pollfd pfd;
         pfd.fd = channel->getFd();
+        std::cout << "ddddddddfff" << std::endl;
         pfd.events = static_cast<short>(channel->getEvents());
         pfd.revents = 0;
+        std::cout << "dddddddd" << std::endl;
         pollfds_.push_back(pfd);
         int id = static_cast <int>(pollfds_.size()) -1;
         channel->setIndex(id);
         channels_[pfd.fd] = channel;
+        
     }
     else {
         //否则则更新描述符信息

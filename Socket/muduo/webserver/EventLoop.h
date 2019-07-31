@@ -7,7 +7,9 @@ class Channel;
 // class Poller;
 class EventLoop {
     public:
-        EventLoop() : looping_(false) {};
+        EventLoop() : looping_(false),
+                        quit_(false),
+                        poller_(Poller::newDefaultPoller(this)) {};
         ~EventLoop() {};
         void updateChannel(Channel * channel);
         void loop();
@@ -15,7 +17,8 @@ class EventLoop {
     private:
         bool looping_;
         bool quit_;
-        boost::scoped_ptr <Poller> poller_;
+        std::shared_ptr <Poller> poller_;
+        // Poller  poller_;
         typedef std::vector<Channel *> ChannelList;
         ChannelList activeChannels_;
 };

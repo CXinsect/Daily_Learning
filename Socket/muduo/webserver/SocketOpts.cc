@@ -1,20 +1,14 @@
 #include "Universal_head.h"
 #include "SocketOpts.h"
-namespace {
-    void setNonBlock (int sockfd) {
-        int flags = ::fcntl(sockfd,F_GETFL,0);
-        flags |= O_NONBLOCK;
-        int ret = ::fcntl(sockfd,F_SETFL,flags);
-        (void)ret;
-    }
-}
+
 void sockets::myError(const char *err_string,int line) {
     std::cout << __func__ << ": "<< line << std::endl;
     perror(err_string);
     exit(1);
 }
 int sockets::creatNonblocking (sa_family_t family) {
-    int sockfd = ::socket(family,SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC | IPPROTO_TCP,0);
+    int sockfd = ::socket(AF_INET,SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC,0);
+    std::cout << sockfd << std::endl;
     if(sockfd < 0) {
         myError("socket",__LINE__);
     }

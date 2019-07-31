@@ -6,9 +6,10 @@ class Address;
 
 class Socket : boost::noncopyable {
     public:
+        // Socket() {}
         explicit Socket(int sockfd_) : sockfd (sockfd_) {}
         ~Socket();
-        int fd (void) { return sockfd; }
+        int getSockfd (void) { return sockfd; }
         void bindAddress (const Address & localAddr);
         void listen();
         int accept(Address *peerAddress);

@@ -1,7 +1,7 @@
 #include "EventLoop.h"
 #include "Channel.cc"
-
-extern int kPollTimeMs;
+#include "Poller.cc"
+int kPollTimeMs = 5*1000;
 void EventLoop::loop() {
     assert(!looping_);
     looping_ = true;

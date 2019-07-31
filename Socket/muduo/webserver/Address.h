@@ -9,11 +9,11 @@ class Address {
     public:
         explicit Address (short port = 0,bool loopbackOnly = false);
         Address (std::string &ip,short port);
-        explicit Address (struct sockaddr_in & addr) : 
+        explicit Address (struct sockaddr_in &addr) : 
                         addr_(addr) {}
-        sa_family_t family () const { return addr_.sin_family; }
-        struct sockaddr* getSockAddr () const {
-            struct sockaddr * addr4 = static_cast <struct sockaddr*>(boost::implicit_cast<void*>(&addr_));
+        //  sa_family_t family () const { return addr_.sin_family; }
+        const struct sockaddr* getSockAddr () const {
+            const struct sockaddr * addr4 = static_cast <const struct sockaddr*>(boost::implicit_cast<const void*>(&addr_));
             return addr4;
         }
         std::string toIp () const;
@@ -21,6 +21,6 @@ class Address {
         short toPort() const;
 
     private:
-        struct sockaddr_in addr_;
+         struct sockaddr_in addr_;
 };
 #endif
