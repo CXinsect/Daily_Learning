@@ -14,8 +14,11 @@ class EventLoop {
         ~EventLoop() {};
         void updateChannel(Channel * channel);
         void removeChannel(Channel * channel);
+        void runInLoop(const CallBack & cb);
+        // bool isInLoopThread();
         void loop();
         void quit();
+                
     private:
         bool looping_;
         bool quit_;
@@ -24,5 +27,7 @@ class EventLoop {
         // Poller  poller_;
         typedef std::vector<Channel *> ChannelList;
         ChannelList activeChannels_;
+        void handleRead();
+
 };
 #endif

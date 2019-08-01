@@ -14,6 +14,7 @@ void Acceptor::Listen() {
   listening_ = true;
   acceptSocket_.listen();
   acceptChannel_.enableReading();
+  // sleep(500);
 }
 
 void Acceptor::handleRead() {

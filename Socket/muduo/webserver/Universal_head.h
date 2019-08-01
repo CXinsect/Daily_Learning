@@ -34,16 +34,26 @@
 #include <boost/bind.hpp>
 
 class TcpConnection;
+class Buffer;
 typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
 
-typedef std::function<void ( TcpConnectionPtr&)> ConnectionCallBack;
+typedef std::function<void ( const TcpConnectionPtr&)> ConnectionCallBack;
 // typedef std::function<void (const TcpConnectionPtr&,
         //                             const char*buf,int len)> MessageCallBack;
 typedef void (*MessageCallBack)(const TcpConnectionPtr&,
-                                const char * buf,
-                                int n);
+                                Buffer* buf);
 
 typedef std::function<void (const TcpConnectionPtr&)> CloseCallBack;
 typedef std::function<void (const TcpConnectionPtr&)> WriteCompleteCallback;
 
+void defaultConnectionCallback(const TcpConnectionPtr& conn)
+{
+   std::cout << "Connected" << std::endl;
+  // do not call conn->forceClose(), because some users want to register message callback only.
+}
+
+void defaultMessageCallback(const TcpConnectionPtr&,
+                                        Buffer* buf);
+
+typedef std::function <void()> CallBack;
 #endif

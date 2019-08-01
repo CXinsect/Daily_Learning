@@ -31,3 +31,6 @@ void Channel::handleEvent() {
         if(writeCallBack_) writeCallBack_();
     eventHanding_ = false;    
 }
+void Channel::remove(void) {
+    loop_->removeChannel(this);
+}

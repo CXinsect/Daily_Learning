@@ -5,6 +5,24 @@
 // using namespace sockets;
 // class TcpConnection;
 
+extern void defaultMessageCallback(const TcpConnectionPtr&conn,
+                                    Buffer * buf)
+{
+    buf->retrieveAllBytes();
+}
+TcpServer::TcpServer(EventLoop *loop,
+                          const Address &listenAddr,
+                          const std::string& name)
+    : loop_(loop),
+    name_(name),
+    acceptor_(new Acceptor(loop,listenAddr)),
+    connectionBack_(defaultConnectionCallback),
+    messageBack_(defaultMessageCallback),
+    nextConfd_(1)
+{
+    acceptor_->setNewConnectionCallBack(
+        boost::bind(&TcpServer::newConnection,this,_1,_2));
+}
 void TcpServer::newConnection (int sockfd,const Address& peerAddr) {
     char buf[32];
     snprintf(buf,sizeof(buf),"#%d",nextConfd_);
@@ -17,11 +35,23 @@ void TcpServer::newConnection (int sockfd,const Address& peerAddr) {
     TcpConnectionPtr conn (new TcpConnection(loop_,name,sockfd,localAddr,peerAddr));
     connection_[name] = conn;
     conn->setConnectionCallBack(connectionBack_);
+    sleep(500);
     conn->setMessageCallBack(messageBack_);
     conn->setCloseCallBack(boost::bind(&TcpServer::removeConnection, this, _1));
-    // conn->connEstablished();
+    loop_->runInLoop(std::bind(&TcpConnection::connectEstablished,conn));
 }
 void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
     std::cout << "removeConnection: "<< name_ <<std::endl;
     connection_.erase(conn->getName());  
+}
+void TcpServer::start() {
+    loop_->runInLoop(std::bind(&Acceptor::Listen,acceptor_.get()));
+}
+TcpServer::~TcpServer() {
+    std::cout << "TcpServer close: " << name_ << std::endl;
+    for(auto&item : connection_) {
+        TcpConnectionPtr conn(item.second);
+        item.second.reset();
+        conn->getLoop()->runInLoop(std::bind(&TcpConnection::handClose,conn));
+    }
 }

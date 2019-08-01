@@ -8,6 +8,10 @@ class TcpConnection;
 
 class TcpServer {
     public:
+    TcpServer(EventLoop *loop,
+             const Address &localAddr,
+             const std::string& Name);
+    //暂时不处理
     ~TcpServer();
     void start();
     void setConnectionCallBack(const ConnectionCallBack& cb) {
@@ -18,19 +22,22 @@ class TcpServer {
     }
     void SetCloseCallBack(const CloseCallBack& cb) {
         closeCallBack_ = cb;
-    } 
+    }
+    // void removeConnection(const TcpConnectionPtr& conn);
+    
     private:
         void removeConnection(const TcpConnectionPtr& conn);
+        void removeConnectInLoop(const TcpConnectionPtr& conn); 
         void newConnection(int sockfd,const Address &peerAddr);
         typedef std::map<std::string,TcpConnectionPtr> ConnectionMap;
         EventLoop *loop_;
         const std::string name_;
-        boost::scoped_ptr <Acceptor> acceptor;
+        bool started_;
+        int nextConfd_;
+        boost::scoped_ptr <Acceptor> acceptor_;
         ConnectionCallBack connectionBack_;
         MessageCallBack messageBack_;
         CloseCallBack closeCallBack_;
-        bool started_;
-        int nextConfd_;
         ConnectionMap connection_;
 };
 

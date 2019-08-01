@@ -28,16 +28,22 @@ class Channel {
         int getEvents() const { return events_; }
         void setRevents(int revt) { revents_ = revt;}
         bool isNoneEvent() const { return events_ == NoneEvent; }
+        bool isWriteing() const { return events_ & WriteEvent; }
         void enableReading () { events_ |= ReadEvent;update(); }
         void enableWriteing () { events_ |= WriteEvent;update(); } 
         void disableWriteing () { events_ &= ~WriteEvent;update(); }  
         void disableAll() { events_ = NoneEvent; update(); }
-        
         int getIndex() { return index_; }
-
+        // void tie(const boost::shared_ptr<void>&obj) {
+        //     tie_ = obj;
+        //     tied_ = true;
+        // }
         void setIndex(int id) { index_ = id; }
         EventLoop *owerLoop () { return loop_; }
-        ~Channel() { assert(!eventHanding_); }
+        void remove(void);
+        ~Channel() { 
+            // assert(!eventHanding_); 
+            }
 
     private:
         void update();
@@ -57,5 +63,7 @@ class Channel {
         EventCallBack errCallBack_;
         EventCallBack closeCallBack_;
         bool eventHanding_;
+        bool tied_;
+        boost::weak_ptr <void> tie_;
 };
 #endif

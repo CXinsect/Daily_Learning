@@ -17,6 +17,7 @@ class Poller {
         void updateChannel(Channel *channel);
         static Poller * newDefaultPoller(EventLoop * loop);
         void setEventLoop(EventLoop *loop) { owerLoop_ = loop;}
+        void removeChannel(Channel *channel);
     private:
         void fillActiveChannels(int numEvents,ChannelList *activeChannels) const;
         typedef std::map<int,Channel *> ChannelMap;

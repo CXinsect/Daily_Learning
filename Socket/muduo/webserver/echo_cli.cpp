@@ -28,8 +28,18 @@ int main(int argc,char * argv[])
     int sockfd = connect(atoi(argv[1]));
     char buf[1024] = {0};
     char recvbuf[1024] = {0};
-    int n = read(sockfd,recvbuf,sizeof(recvbuf));
-    std::cout << recvbuf << "n: "<< n <<  std::endl;
+    char sendbuf[1024] = "hello,Linux";
+    int nwrite = write(sockfd,sendbuf,strlen(buf));
+    std::cout << nwrite << std::endl;
+    int n;
+    while((n = read(sockfd,recvbuf,sizeof(recvbuf)) >= 0)) {
+        std::cout << recvbuf << "n: "<< n <<  std::endl;
+        if(n == 0) {
+            std::cout << "Server is Over" << std::endl;
+            break;
+        }
+        memset(recvbuf,0,sizeof(recvbuf));
+    }
     close(sockfd);
     return 0;
 }
