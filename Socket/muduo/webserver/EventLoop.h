@@ -3,6 +3,7 @@
 #include "Universal_head.h"
  #include "Poller.h"
 #include "Channel.h"
+
 class Channel;
 // class Poller;
 class EventLoop {
@@ -10,14 +11,16 @@ class EventLoop {
         EventLoop() : looping_(false),
                         quit_(false),
                         eventHanding_(false),
-                        poller_(Poller::newDefaultPoller(this)) {};
-        ~EventLoop() {};
+                        poller_(Poller::newDefaultPoller(this)) 
+                        {};
+        ~EventLoop();
         void updateChannel(Channel * channel);
         void removeChannel(Channel * channel);
         void runInLoop(const CallBack & cb);
         // bool isInLoopThread();
         void loop();
         void quit();
+        // static int upFd;
                 
     private:
         bool looping_;
@@ -27,7 +30,9 @@ class EventLoop {
         // Poller  poller_;
         typedef std::vector<Channel *> ChannelList;
         ChannelList activeChannels_;
+        //处理活动的线程
+        // int upFd_;
+        std::unique_ptr <Channel> upchannel_;
         void handleRead();
-
 };
 #endif

@@ -8,7 +8,7 @@
 // }
 Poller::Poller(EventLoop *loop) : owerLoop_(loop) {}
 
-Poller::~Poller() {};
+Poller::~Poller() {std::cout << "ddd" << std::endl;};
 
 void Poller::poll(int timeoutMs,ChannelList *activeChannels) {
     int numEvents = ::poll(&*pollfds_.begin(),pollfds_.size(),timeoutMs);
@@ -46,6 +46,7 @@ void Poller::updateChannel(Channel *channel) {
     std::cout << "fd= " << channel->getFd() << "events= " << channel->getEvents() << std::endl;
     //如果是新事件则加入事件列表
     if(channel->getIndex() < 0) {
+        std::cout << "First" << std::endl;
         assert(channels_.find(channel->getFd()) == channels_.end());
         struct pollfd pfd;
         pfd.fd = channel->getFd();
@@ -53,12 +54,14 @@ void Poller::updateChannel(Channel *channel) {
         pfd.revents = 0;
         pollfds_.push_back(pfd);
         int id = static_cast <int>(pollfds_.size()) -1;
+        std::cout << "id: " << id << std::endl;
         channel->setIndex(id);
         channels_[pfd.fd] = channel;
         
     }
     else {
         //否则则更新描述符信息
+        std::cout << "end" << std::endl;
         assert(channels_.find(channel->getFd()) != channels_.end());
         assert(channels_[channel->getFd()] == channel);
         int id = channel->getIndex();
@@ -81,7 +84,8 @@ void Poller::removeChannel(Channel *channel) {
     int id = channel->getIndex();
     assert(id >= 0 && id < static_cast<int>(pollfds_.size()));
     const struct pollfd &pfd = pollfds_[id];
-    assert(pfd.events == channel->getEvents());
+    // std::cout << "Poller::remove" << channel->getFd() << channel->getEvents() << std::endl;
+    assert(pfd.fd == -channel->getFd()-1 && pfd.events == channel->getEvents());
     size_t n = channels_.erase(channel->getFd());
     assert(n == 1);
     if(boost::implicit_cast<size_t>(id) == pollfds_.size()-1) {

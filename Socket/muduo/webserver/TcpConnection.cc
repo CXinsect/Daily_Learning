@@ -2,10 +2,12 @@
 
 
 void TcpConnection::handleRead () {
+    std::cout << "TcpConnnection handleread" << std::endl;
     ssize_t n = inputBuffer_.readFd(channel_->getFd());
     if(n > 0) {
         messageCallBack_(shared_from_this(),&inputBuffer_);
     } else if(n == 0) {
+        // exit(0);
         handClose();
     }
     else {
@@ -14,6 +16,7 @@ void TcpConnection::handleRead () {
 }
 void TcpConnection::handWrite () {
     if(channel_->isWriteing()) {
+        std::cout << "writeing" << std::endl;
         ssize_t n = ::write(channel_->getFd(),outputBuffer_.peek(),outputBuffer_.getReadableBytes());
         if(n > 0) {
             outputBuffer_.retrieve(n);
@@ -41,7 +44,8 @@ void TcpConnection::send(const std::string& message) {
 }
 void TcpConnection::sendInLoop (const std::string &message) {
     ssize_t nwrite = 0;
-    if(channel_->isWriteing() && outputBuffer_.getReadableBytes() == 0) {
+    if(!channel_->isWriteing() && outputBuffer_.getReadableBytes() == 0) {
+        std::cout << "writeing" << std::endl;
         nwrite = ::write(channel_->getFd(),message.c_str(),message.size());
         if(nwrite >= 0) {
             if(boost::implicit_cast<size_t>(nwrite) < message.size()) {
@@ -65,7 +69,7 @@ void TcpConnection::sendInLoop (const std::string &message) {
 void TcpConnection::shutdown() {
     if(state_ == Connected) {
         setState(Disconnecting);
-        shutdownInLoop();
+        loop_->runInLoop(boost::bind(&TcpConnection::shutdownInLoop,this));
     }
 }
 void TcpConnection::shutdownInLoop() {

@@ -7,7 +7,7 @@ EventLoop * loop_;
 void timeout() {
     std::cout << "timeout" << std::endl;
     loop_->quit();
-    exit(0);
+    // exit(0);
 }
 int main (void) {
     EventLoop loop;

@@ -56,4 +56,6 @@ void defaultMessageCallback(const TcpConnectionPtr&,
                                         Buffer* buf);
 
 typedef std::function <void()> CallBack;
+
+
 #endif

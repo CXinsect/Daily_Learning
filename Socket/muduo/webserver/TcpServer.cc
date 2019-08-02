@@ -34,8 +34,8 @@ void TcpServer::newConnection (int sockfd,const Address& peerAddr) {
     Address localAddr(sockets::getLocalAddr(sockfd));
     TcpConnectionPtr conn (new TcpConnection(loop_,name,sockfd,localAddr,peerAddr));
     connection_[name] = conn;
+    // sleep(500);
     conn->setConnectionCallBack(connectionBack_);
-    sleep(500);
     conn->setMessageCallBack(messageBack_);
     conn->setCloseCallBack(boost::bind(&TcpServer::removeConnection, this, _1));
     loop_->runInLoop(std::bind(&TcpConnection::connectEstablished,conn));

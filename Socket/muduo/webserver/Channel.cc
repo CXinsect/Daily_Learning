@@ -18,7 +18,7 @@ void Channel::update (void) {
 }
 
 void Channel::handleEvent() {
-    eventHanding_ = true;
+     eventHanding_ = true;
     if((revents_ &POLLHUP) && !(revents_ &POLLIN)) {
         std::cout << "Channel::handleEvent() POLLHUP" <<std::endl;
         if(closeCallBack_) closeCallBack_();
@@ -32,5 +32,7 @@ void Channel::handleEvent() {
     eventHanding_ = false;    
 }
 void Channel::remove(void) {
+    assert(isNoneEvent());
+    
     loop_->removeChannel(this);
 }

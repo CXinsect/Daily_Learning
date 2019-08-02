@@ -9,7 +9,6 @@ using namespace sockets;
 void onConnection(const TcpConnectionPtr &conn) {
     if(conn->isConnected()) {
         std::cout << "connection: " << conn->getName() << std::endl;
-        // sleep(500);
         std::string s1("hello");
         std::string s2("world");
        
@@ -31,7 +30,7 @@ int main (void) {
     Address listenAddr(8888);
     TcpServer server(&loop,listenAddr,"cxinsect");
     server.setConnectionCallBack(onConnection);
-    server.setMessageCallBack(onMessage);
+     server.setMessageCallBack(onMessage);
      server.start();
      loop.loop();
     return 0;

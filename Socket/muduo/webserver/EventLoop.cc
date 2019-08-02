@@ -8,7 +8,7 @@ void EventLoop::loop() {
     quit_ = false;
     while(!quit_) {
         activeChannels_.clear();
-        poller_->poll(kPollTimeMs,&activeChannels_);
+        poller_->poll(-1,&activeChannels_);
         eventHanding_ = true;
         for(ChannelList::iterator it = activeChannels_.begin();
             it != activeChannels_.end();it++) {
@@ -35,4 +35,9 @@ void EventLoop::removeChannel(Channel * channel_) {
         assert(std::find(activeChannels_.begin(),activeChannels_.end(),channel_) == activeChannels_.end());
     }
     poller_->removeChannel(channel_);
+}
+EventLoop::~EventLoop() {
+    std::cout << "~EventLoop begin" << std::endl;
+    // upchannel_->disableAll();
+    // upchannel_->remove();
 }
