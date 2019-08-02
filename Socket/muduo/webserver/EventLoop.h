@@ -14,12 +14,14 @@ class EventLoop {
                         poller_(Poller::newDefaultPoller(this)) 
                         {};
         ~EventLoop();
+        typedef std::function <void()> lifeCycle;
         void updateChannel(Channel * channel);
         void removeChannel(Channel * channel);
         void runInLoop(const CallBack & cb);
         // bool isInLoopThread();
         void loop();
         void quit();
+        void queueLoop(lifeCycle cb);
         // static int upFd;
                 
     private:
@@ -33,6 +35,7 @@ class EventLoop {
         //处理活动的线程
         // int upFd_;
         std::unique_ptr <Channel> upchannel_;
+        std::vector <lifeCycle> pendingEvent_;
         void handleRead();
 };
 #endif

@@ -44,6 +44,7 @@ class TcpConnection :
         void connectEstablished();
         EventLoop* getLoop() { return loop_;}
         void handClose();
+        void connectionClose();
     private:
         enum State { Connecting,Connected,Disconnecting,Disconnceted};
         EventLoop *loop_;

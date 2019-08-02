@@ -34,17 +34,13 @@ int main(int argc,char * argv[])
     std::cout << nwrite << errno << std::endl;
     while((nwrite = write(sockfd,sendbuf,strlen(buf))) > 0);*/
     int n;
-    n = write(sockfd,"hello",10);
+    n = write(sockfd,"Linux",10);
     std::cout << recvbuf << "n: "<< n <<  std::endl;
     int count = 0;
-    while((n = read(sockfd,recvbuf,sizeof(recvbuf)) >= 0)) {
-        std::cout << "recv"<<recvbuf<<"dd" <<  std::endl;
-        if(count == 2)
-            printf("Cx:%c\n",recvbuf[1]);
+    while((n = read(sockfd,recvbuf,sizeof(recvbuf)))) {
+        std::cout << "recvbuf" << recvbuf << n <<std::endl;
         memset(recvbuf,0,sizeof(recvbuf));
-        if(++count < 3)
-            continue;
-        if(n == 1) {
+        if(n == 0) {
             std::cout << "Server is Over" << std::endl;
             break;
         }

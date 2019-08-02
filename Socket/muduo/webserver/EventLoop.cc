@@ -38,6 +38,7 @@ void EventLoop::removeChannel(Channel * channel_) {
 }
 EventLoop::~EventLoop() {
     std::cout << "~EventLoop begin" << std::endl;
-    // upchannel_->disableAll();
-    // upchannel_->remove();
+}
+void EventLoop::queueLoop(lifeCycle cb) {
+    pendingEvent_.push_back(std::move(cb));
 }

@@ -38,19 +38,11 @@ class Channel {
     update();
   }
   int getIndex() { return index_; }
-  // void tie(const boost::shared_ptr<void>&obj) {
-  //     tie_ = obj;
-  //     tied_ = true;
-  // }
+  void tie(const boost::shared_ptr<void>&obj);
   void setIndex(int id) { index_ = id; }
   EventLoop *owerLoop() { return loop_; }
   void remove(void);
-  ~Channel() { 
-      assert(!eventHanding_);
-      this->disableAll();
-      this->remove();
-      ::close(fd_);
-}
+  ~Channel();
 
  private:
   void update();

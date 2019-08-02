@@ -19,7 +19,9 @@ ssize_t Buffer::readFd (int fd) {
     iov[1].iov_base = buf;
     iov[1].iov_len = sizeof(buf);
     const size_t n = ::readv(fd,iov,2);
-    if(n < 0) {
+    std::cout << "n: " << static_cast<int>(n) << ": " << strerror(errno) << "fd" << fd <<  std::endl;
+    
+    if(static_cast<int>(n) < 0) {
         std::cout << "Buffer::readFd: "<< __LINE__ << std::endl;
     }
     else if(boost::implicit_cast<size_t>(n) <= writeAble) {

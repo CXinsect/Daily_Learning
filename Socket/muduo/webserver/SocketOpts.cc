@@ -74,7 +74,6 @@ void sockets::toIpPort(char *buf,size_t size,const struct sockaddr *addr) {
     short port = ntohs(addr1->sin_port);
     //判断缓冲区大是否足够
     assert(size > end);
-    //????
     snprintf(buf+end,size-end,":%u",port);
 }
 
