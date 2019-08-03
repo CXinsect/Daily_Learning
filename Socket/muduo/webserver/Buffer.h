@@ -17,6 +17,7 @@ class Buffer {
         void retrieve(size_t len);
         void retrieveUntil(const char *end);
         void retrieveAllBytes();
+        std::string retrieveAllAsString() { return retrieveAsString(getReadableBytes()); }
         std::string retrieveAsString(size_t len);
         char* writeBegin() { return getDateBegin() + writeIndex_; }
         void hadWriten(size_t len) ;
