@@ -23,6 +23,8 @@ class Buffer {
         void hadWriten(size_t len) ;
         void Append(const char *data,size_t len);
         ssize_t readFd(int fd);
+        int getDateBegin(int) { return static_cast<int>(readIndex_); };
+
     private:
           char * getDateBegin() { return &*buffer_.begin(); }
 

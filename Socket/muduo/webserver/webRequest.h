@@ -8,20 +8,26 @@
 #include <string.h>
 #include "TcpConnection.h"
 #include "TcpServer.h"
-#include "Buffer.h"
 #include "disCription.h"
+#include "webResponse.h"
 class webRequest :public disCription {
     public:
 
-        webRequest(): method_(GET),url_(NULL),version_(NULL),
+        webRequest(): method_(GET),url_(std::string()),version_(std::string()),
                       checkIndex_(0),startLine_(0),checkstate_(CheckStateRequestLine),
-                      host_(NULL),messageLength_(0),link_(false) {}
-                      
+                      host_(std::string()),messageLength_(0) {}
+                  
+        void setBuffer (Buffer &buffer) {
+            buffer_ = buffer;
+            requeseBuffer_ = buffer_.retrieveAllAsString();
+        }
         LineStatus parseLine();
         HttpCode parseRequestLine (std::string& text);
         HttpCode parseHeader(std::string& text);
         HttpCode parseContext(std::string& text);
         HttpCode eventProcess();
+        HttpCode requestAction();
+        void fileRequestRead();
     private:
         Method method_;
         std::string url_;
@@ -33,10 +39,10 @@ class webRequest :public disCription {
         std::string host_;
         int messageLength_;
         int contentLength_;
-        bool link_;
-        struct stat filestat_;
+        struct stat st_;
         std::string requeseBuffer_;
-        int conn_;
+        TcpConnectionPtr conn_;
         Buffer buffer_;
 };
+class webResponse;
 #endif

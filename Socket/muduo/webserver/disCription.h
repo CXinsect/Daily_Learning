@@ -10,11 +10,11 @@ class disCription {
                            CheckStateContent };
         enum HttpCode { NoRequest, GetRequest, BadRequest,
                          NoResource, ForbidenRequest, FileRequest,
-                         InternalError,ClosedConnection };
+                         DirRequest,InternalError,ClosedConnection };
         enum LineStatus { LineStatusOk,LineStatusBad,LineStatusOpen };
 
         const std::string defaultFilePath = "/home/insect";
         std::string filePath;
-
+        bool link_ = false;
 };
 #endif

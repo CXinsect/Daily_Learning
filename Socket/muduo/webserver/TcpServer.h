@@ -2,7 +2,7 @@
 #define  _TCP_SERVER_H_
 #include "EventLoop.h"
 #include "Address.h"
-#include "Acceptor.h"
+#include "Acceptor.cc"
 #include "Universal_head.h"
 class TcpConnection;
 
@@ -17,7 +17,7 @@ class TcpServer {
     void setConnectionCallBack(const ConnectionCallBack& cb) {
         connectionBack_ = cb;
     }
-    void setMessageCallBack(const MessageCallBack& cb) {
+    void setMessageCallBack(const MessageCallBack cb) {
         messageBack_ = cb;
     }
     void SetCloseCallBack(const CloseCallBack& cb) {

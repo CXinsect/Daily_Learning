@@ -24,6 +24,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/is_placeholder.hpp>
+#include <boost/any.hpp>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -35,9 +37,8 @@ class Buffer;
 typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 typedef std::function<void(const TcpConnectionPtr&)> ConnectionCallBack;
-// typedef std::function<void (const TcpConnectionPtr&,
-//                             const char*buf,int len)> MessageCallBack;
-typedef void (*MessageCallBack)(const TcpConnectionPtr&, Buffer* buf);
+typedef std::function<void(const TcpConnectionPtr&, Buffer *buf)>MessageCallBack;
+// typedef void (*MessageCallBack)(const TcpConnectionPtr&, Buffer *buf);
 
 typedef std::function<void(const TcpConnectionPtr&)> CloseCallBack;
 typedef std::function<void(const TcpConnectionPtr&)> WriteCompleteCallback;

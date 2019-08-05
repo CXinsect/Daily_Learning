@@ -48,6 +48,11 @@ void TcpConnection::send(const std::string& message) {
     sendInLoop(message);
   }
 }
+void TcpConnection::send(Buffer * buffer) {
+  if(state_ == Connected) {
+    sendInLoop(buffer->retrieveAllAsString());
+  }
+}
 void TcpConnection::sendInLoop(const std::string& message) {
   ssize_t nwrite = 0;
   if (!channel_->isWriteing() && outputBuffer_.getReadableBytes() == 0) {
