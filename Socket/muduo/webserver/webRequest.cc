@@ -73,26 +73,32 @@ webRequest::HttpCode webRequest::parseHeader(std::string& text) {
     if(strncasecmp(text.c_str(),"Host:",5) == 0) {
         text = text.substr(5,text.size());
         int pos = text.find_first_not_of(" ");
-        text = text.substr(pos,text.size());
-        host_ = text;
+        int pos2 = text.find_first_of("\r");
+        std::string tmp = text.substr(pos,pos2-1);
+        text = text.substr(pos2+2,text.size());
+        host_ = tmp;
+
         std::cout << "Request::host_: " << host_ << std::endl;
 
     }
-    else if(strncasecmp(text.c_str(),"Connection:",11) == 0) {
+    if(strncasecmp(text.c_str(),"Connection:",11) == 0) {
         text = text.substr(11,text.size());
         int pos = text.find_first_not_of(" ");
-        text = text.substr(pos,text.size());
-        std::cout << "Request::Connection: " << text << std::endl;
+        std::string tmpcontent = text.substr(pos,pos+10);
+        text = text.substr(pos+12,text.size());
+        std::cout << "Request::Connection: " << tmpcontent << std::endl;
         if(strcasecmp(text.c_str(),"keep-alive") == 0)
             link_ = true;
     }
-    else if(strncasecmp(text.c_str(),"Content-Length:",15) == 0) {
-        text = text.substr(15,text.size());
-        int pos = text.find_first_not_of(" ");
-        text = text.substr(pos,text.size());
-        contentLength_ = atol(text.c_str());
-        std::cout << "Request::Content-Length: " << contentLength_ << std::endl;
-    }
+    // if(strncasecmp(text.c_str(),"Cache-Control:",14) == 0) {
+    //     text = text.substr(14,text.size());
+    //     int pos = text.find_first_not_of(" ");
+    //     int pos2 = text.find_first_of("\r");
+    //     std::string tmpcachecontrol = text.substr(pos,pos2-1);
+    //     text = text.substr(pos2+2,text.size());
+    //     contentLength_ = atol(tmpcachecontrol.c_str());
+    //     std::cout << "Request::Content-Length: " << contentLength_ << std::endl;
+    // }
     else {
         std::cout << "Temporarily unprocessed" << std::endl;
     }
@@ -105,6 +111,7 @@ webRequest::HttpCode webRequest::parseContext(std::string& text) {
     return NoRequest;
 }
 webRequest::HttpCode  webRequest::requestAction() {
+    filePath = url_;
     std::cout << "Default File Path: " << filePath << std::endl;
     // struct stat st;
     if(stat(filePath.c_str(),&st_) < 0)  return NoResource;

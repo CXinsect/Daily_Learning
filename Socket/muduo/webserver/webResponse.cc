@@ -46,7 +46,9 @@ void webResponse::fileResponseAssembly(Buffer *buffer_) {
         case FileRequest: {
             memset(buf_,0,sizeof(buf_));
             snprintf(buf_,sizeof(buf_),"%s %d %s\r\n",Version.c_str(),200,Ok.c_str());
-            buffer_->Append(buf_,strlen(buf_));
+            std::cout << strlen(buf_) << std::endl;
+            std::string tmp = buf_;
+            buffer_->Append(tmp.c_str(),tmp.size());
             if(st_.st_size != 0) {
                 fileResponseAddHead(buffer_,Ok.size());
                 buffer_->Append(fileAddr,strlen(fileAddr));
