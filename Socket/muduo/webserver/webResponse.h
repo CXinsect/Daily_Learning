@@ -21,19 +21,41 @@ class webResponse : public disCription {
   const std::string _404 = "Not Found";
   const std::string _500 = "Internal Error";
   HttpCode requestAction(void);
+<<<<<<< HEAD
   HttpCode fileRequest(void);
+=======
+>>>>>>> test1
   // bool fileResponseWrite(const TcpConnectionPtr &conn_,Buffer*buffer_);
   void fileResponseAddHead(Buffer *buffer_,int length_);
   bool fileResponseAssembly(Buffer *buffer_);
   void setHttpCodeStatus(HttpCode status) { httpcodestatus_ = status; }
   std::string getFileType();
   ~webResponse() {
+<<<<<<< HEAD
     if (fileAddr) {
       munmap(fileAddr, disCription::st_.st_size);
       fileAddr = NULL;
     }
   }
   static char* fileAddr; 
+=======
+    // int i = 1;
+    // while (count_) {
+    //   munmap(fileAddr, BuffSize);
+    //   count_--;
+    //   if(i-- == 1)
+    //      flagsAddr -= tail_;
+    //   flagsAddr -= BuffSize;
+    // }
+    if(fileAddr)
+      munmap(fileAddr,st_.st_size);
+    flagsAddr = NULL;
+  }
+  static char* fileAddr;
+  static char *flagsAddr;
+  static int count_;
+  static int tail_;
+>>>>>>> test1
  private:
   webRequest request_;
   // Buffer buffer_;
@@ -41,7 +63,15 @@ class webResponse : public disCription {
   char buf_[64];
   HttpCode httpcodestatus_;
   std::string title_;
+<<<<<<< HEAD
   const std::string filename;
 };
 char *webResponse::fileAddr = NULL;
+=======
+};
+char *webResponse::fileAddr = NULL;
+char *webResponse::flagsAddr = NULL;
+int webResponse::count_ = 0;
+int webResponse::tail_ = 0;
+>>>>>>> test1
 #endif

@@ -66,6 +66,10 @@ void Buffer::Append(const char *data,size_t len) {
         else {
             assert(PREPEND < readIndex_);
             size_t Read = getReadableBytes();
+            // if(Read >= 65535) {
+            //     return;
+            // }
+            std::cout << "readlen: "<< Read << std::endl;
             std::copy(getDateBegin()+readIndex_,getDateBegin()+writeIndex_,
                     getDateBegin() + PREPEND);
             readIndex_ = PREPEND;

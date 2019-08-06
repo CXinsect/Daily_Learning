@@ -12,7 +12,10 @@
 #include "webResponse.h"
 class webRequest :public disCription {
     public:
+<<<<<<< HEAD
 
+=======
+>>>>>>> test1
         webRequest(): method_(GET),url_(std::string()),version_(std::string()),
                       checkIndex_(0),startLine_(0),checkstate_(CheckStateRequestLine),
                       host_(std::string()),messageLength_(0) {}

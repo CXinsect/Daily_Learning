@@ -30,8 +30,16 @@ void Channel::handleEvent() {
         if (errCallBack_) errCallBack_();
       if (revents_ & (POLLIN | POLLPRI | POLLRDHUP))
         if (readCallBack_) readCallBack_();
+<<<<<<< HEAD
       if (revents_ & POLLOUT)
         if (writeCallBack_) writeCallBack_();
+=======
+      if (revents_ & POLLOUT) {
+        std::cout << "comming in" << std::endl;
+          if (writeCallBack_) writeCallBack_();
+      }
+        
+>>>>>>> test1
       eventHanding_ = false;
     }
   }

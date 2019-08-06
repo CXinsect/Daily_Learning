@@ -3,7 +3,11 @@
 #define PREPEND 8
 class Buffer {
     public:
-      
+        Buffer () : buffer_(1024+PREPEND),readIndex_(PREPEND),writeIndex_(PREPEND) {
+            assert(getReadableBytes() == 0);
+            assert(getWriteableBytes() == 1024);
+            assert(getPrependableBytes() == PREPEND);
+        }
         void append(const char *buf,size_t dateLen);
         size_t getCapicty() const { return buffer_.capacity(); }
         
@@ -11,8 +15,8 @@ class Buffer {
         void prepend(const void *data,size_t len);
         void prependInt(int len);
 
-        size_t getReadableBytes() { return writeIndex_ - readIndex_; }
-        size_t getWriteableBytes() { return buffer_.size() - writeIndex_; }
+        size_t getReadableBytes() const { return writeIndex_ - readIndex_; }
+        size_t getWriteableBytes() const { return buffer_.size() - writeIndex_; }
         const char* peek() { return getDateBegin() + readIndex_; }
         void retrieve(size_t len);
         void retrieveUntil(const char *end);

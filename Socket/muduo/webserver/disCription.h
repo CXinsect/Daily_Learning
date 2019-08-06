@@ -19,8 +19,18 @@ class disCription {
 
         const std::string defaultFilePath = "/home/insect";
         std::string filePath;
+<<<<<<< HEAD
         bool link_ = false;
         static struct stat st_;
 };
 struct stat disCription::st_;
+=======
+        static std::string filename_;
+        bool link_ = false;
+        static struct stat st_;
+        const int BuffSize = 4096;
+};
+struct stat disCription::st_;
+std::string disCription::filename_ = std::string();
+>>>>>>> test1
 #endif

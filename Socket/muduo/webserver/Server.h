@@ -29,6 +29,10 @@ class Server {
             void onRequest(const TcpConnectionPtr&,disCription::HttpCode status);
             TcpServer server_;
             webCallBack webcallback_; 
+<<<<<<< HEAD
+=======
+            EventLoop *loop_;
+>>>>>>> test1
 };
 
 #endif
