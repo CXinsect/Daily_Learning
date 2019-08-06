@@ -55,6 +55,7 @@ void TcpConnection::send(Buffer * buffer) {
 }
 void TcpConnection::sendInLoop(const std::string& message) {
   ssize_t nwrite = 0;
+  std::cout << "Sendinloop:: Messgae : " << message<< std::endl;
   if (!channel_->isWriteing() && outputBuffer_.getReadableBytes() == 0) {
     std::cout << "writeing" << std::endl;
     nwrite = ::write(channel_->getFd(), message.c_str(), message.size());
@@ -85,7 +86,7 @@ void TcpConnection::shutdownInLoop() {
   if (!channel_->isWriteing()) socket_->shutdownWrite();
 }
 void TcpConnection::connectEstablished() {
-  assert(state_ == Connecting);
+  // assert(state_ == Connecting);
   setState(Connected);
   channel_->tie(shared_from_this());
   channel_->enableReading();

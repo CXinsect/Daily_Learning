@@ -39,7 +39,6 @@ class webRequest :public disCription {
         std::string host_;
         int messageLength_;
         int contentLength_;
-        struct stat st_;
         std::string requeseBuffer_;
         TcpConnectionPtr conn_;
         Buffer buffer_;

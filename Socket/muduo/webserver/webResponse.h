@@ -24,11 +24,12 @@ class webResponse : public disCription {
   HttpCode fileRequest(void);
   // bool fileResponseWrite(const TcpConnectionPtr &conn_,Buffer*buffer_);
   void fileResponseAddHead(Buffer *buffer_,int length_);
-  void fileResponseAssembly(Buffer *buffer_);
+  bool fileResponseAssembly(Buffer *buffer_);
   void setHttpCodeStatus(HttpCode status) { httpcodestatus_ = status; }
+  std::string getFileType();
   ~webResponse() {
     if (fileAddr) {
-      munmap(fileAddr, st_.st_size);
+      munmap(fileAddr, disCription::st_.st_size);
       fileAddr = NULL;
     }
   }
@@ -40,7 +41,7 @@ class webResponse : public disCription {
   char buf_[64];
   HttpCode httpcodestatus_;
   std::string title_;
-  struct stat st_;
+  const std::string filename;
 };
 char *webResponse::fileAddr = NULL;
 #endif

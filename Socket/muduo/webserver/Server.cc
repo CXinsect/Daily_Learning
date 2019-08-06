@@ -30,11 +30,13 @@ void Server::onMessage (const TcpConnectionPtr& conn,
 }
 
 void Server::onRequest (const TcpConnectionPtr& conn,disCription::HttpCode status) {
-    Buffer buffer_;
+    Buffer *buffer_ = new Buffer;
     webResponse response_;
     response_.setHttpCodeStatus(status);
-    response_.fileResponseAssembly(&buffer_);
-    std::cout << "Send Data: " << buffer_.retrieveAllAsString() << std::endl;
-    conn->send(&buffer_);
+    bool flags = response_.fileResponseAssembly(buffer_);
+    if(!flags)
+        conn->handClose();
+    // std::cout << "Send Data: " << buffer_->retrieveAllAsString() << std::endl;
+    conn->send(buffer_);
 }
 
