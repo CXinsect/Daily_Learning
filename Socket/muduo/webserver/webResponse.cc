@@ -3,11 +3,8 @@
 void webResponse::fileResponseAddHead(Buffer *buffer_,int length_) {
    std::cout << "hello" << std::endl;
     memset(buf_,0,sizeof(buf_));
-<<<<<<< HEAD
-=======
     snprintf(buf_,sizeof(buf_),"Content-Type: %s\r\n",getFileType().c_str());    
     memset(buf_,0,sizeof(buf_));
->>>>>>> test1
     snprintf(buf_,sizeof(buf_),"Content-Length: %d\r\n",length_);
     buffer_->Append(buf_,strlen(buf_));
     memset(buf_,0,sizeof(buf_));
@@ -62,10 +59,6 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_) {
             buffer_->Append(tmp.c_str(),tmp.size());
             if(st_.st_size != 0) {
                 fileResponseAddHead(buffer_,st_.st_size);
-<<<<<<< HEAD
-                std::cout << "filesize: " << strlen(fileAddr) << std::endl;
-                buffer_->Append(fileAddr,strlen(fileAddr));
-=======
                 int n = 0;
                 // while(n < count_) {
                 //     std::cout << "filesize--: " << strlen(fileAddr) << "content" << fileAddr << std::endl;
@@ -77,7 +70,6 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_) {
                 // }
                 std::string tmp (fileAddr,st_.st_size);
                 buffer_->Append(tmp.c_str(),tmp.size());
->>>>>>> test1
             }
             else {
                 const std::string emptyFile = "<html><body></body></html>";
@@ -96,11 +88,7 @@ std::string webResponse::getFileType() {
     const char* dot;
 
     // 自右向左查找‘.’字符, 如不存在返回NULL
-<<<<<<< HEAD
-    dot = strrchr(filename.c_str(), '.');   
-=======
     dot = strrchr(filename_.c_str(), '.');   
->>>>>>> test1
     if (dot == NULL)
         return "text/plain; charset=utf-8";
     if (strcmp(dot, ".html") == 0 || strcmp(dot, ".htm") == 0)
