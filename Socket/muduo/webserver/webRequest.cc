@@ -46,9 +46,9 @@ webRequest::HttpCode webRequest::parseRequestLine (std::string& text) {
     url_ = url_.substr(0,pos2);
     if(url_.size() == 0) return BadRequest;
     std::cout << "webRequest::url " << url_ << std::endl;
-    int pos3 = version_.find_first_of(" \r");
-    version_ = version_.substr(0,pos3);
-    text = text.substr(pos3+2,text.size());
+    // int pos3 = version_.find_first_of(" \t");
+    version_ = version_.substr(0,8);
+    text = text.substr(8+2,text.size());
     std::cout << "webRequest::version " << version_ << std::endl;
     if(version_.size() == 0) return BadRequest;
     if(version_ != "HTTP/1.1") return BadRequest;
@@ -125,24 +125,36 @@ webRequest::HttpCode  webRequest::requestAction() {
     }   
     int fd = open(filePath.c_str(),O_RDONLY);
     assert(fd != -1);
-    ssize_t length = st_.st_size;
-    int offset = 0;
-    webResponse::fileAddr = webResponse::flagsAddr = (char*)mmap(NULL,BuffSize,PROT_READ,MAP_PRIVATE,fd,offset);
+    // ssize_t length = st_.st_size;
+    // int offset = BuffSize;
+    // webResponse::fileAddr = webResponse::flagsAddr = (char*)mmap(NULL,BuffSize,PROT_READ,MAP_PRIVATE,fd,offset);
+    // assert(webResponse::fileAddr != MAP_FAILED);
+    // webResponse::count_++;
+    // length -= BuffSize;
+    // long sum = BuffSize;
+    // while(length > 0) {
+    //     if(length > 0 && length < BuffSize) {
+    //         webResponse::count_++;
+    //         webResponse::tail_ = length;
+    //         webResponse::flagsAddr += BuffSize;
+    //         webResponse::flagsAddr = (char*)mmap(webResponse::flagsAddr,length,PROT_READ,MAP_PRIVATE,fd,offset);
+    //         offset += length;
+    //         sum += webResponse::tail_;
+    //         std::cout << "sum:---------" << sum << std::endl;
+    //         break;
+    //     }
+    //     webResponse::flagsAddr += BuffSize;
+    //     offset += BuffSize;
+    //     sum += BuffSize;
+    //     length -= BuffSize;
+    //     webResponse::count_++;
+    //     webResponse::flagsAddr = (char*)mmap(webResponse::flagsAddr,BuffSize,PROT_READ,MAP_PRIVATE,fd,offset);
+    //     assert(webResponse::flagsAddr != MAP_FAILED);
+        
+    //     std::cout << length << std::endl;
+    // }
+    webResponse::fileAddr = (char*)mmap(NULL,st_.st_size,PROT_READ,MAP_PRIVATE,fd,0);
     assert(webResponse::fileAddr != MAP_FAILED);
-    length -= BuffSize;
-    while(length > 0) {
-        webResponse::flagsAddr += BuffSize;
-        offset += BuffSize;
-        webResponse::flagsAddr = (char*)mmap(NULL,BuffSize,PROT_READ,MAP_PRIVATE,fd,offset);
-        assert(webResponse::flagsAddr != MAP_FAILED);
-        webResponse::count_++;
-        if(length > 0 && length < BuffSize) {
-            webResponse::count_++;
-            offset = offset + BuffSize - length;
-            webResponse::flagsAddr = (char*)mmap(NULL,BuffSize,PROT_READ,MAP_PRIVATE,fd,offset);
-        }
-        length -= BuffSize;
-    }
     ::close(fd);
     // contentLength = st_.st_size;
     return FileRequest;

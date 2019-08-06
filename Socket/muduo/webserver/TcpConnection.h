@@ -24,6 +24,10 @@ class TcpConnection :
         {
             channel_->setReadCallBack(
                 std::bind(&TcpConnection::handleRead,this));
+            channel_->setWriteCallBack(boost::bind(&TcpConnection::handWrite,this));
+            channel_->setCloseCallBack(boost::bind(&TcpConnection::handClose,this));
+            channel_->setErrCallBack(boost::bind(&TcpConnection::handClose,this));
+
         }
         void setConnectionCallBack(ConnectionCallBack &cb) {
             connectionCallBack_ = cb;

@@ -6,7 +6,7 @@ const std::_Placeholder<2> std::placeholders::_2;
 Server::Server(EventLoop* loop,
                 const Address &listenAddr,
                 const string& name) 
-        :server_(loop,listenAddr,name)
+        :server_(loop,listenAddr,name),loop_(loop)
 {
     server_.setConnectionCallBack(boost::bind(&Server::onConnection,this, _1));
     server_.setMessageCallBack(boost::bind(&Server::onMessage,this,_1,_2));
@@ -34,9 +34,11 @@ void Server::onRequest (const TcpConnectionPtr& conn,disCription::HttpCode statu
     webResponse response_;
     response_.setHttpCodeStatus(status);
     bool flags = response_.fileResponseAssembly(buffer_);
-    if(!flags)
+    if(!flags) {
         conn->handClose();
+    }
     // std::cout << "Send Data: " << buffer_->retrieveAllAsString() << std::endl;
     conn->send(buffer_);
+    // loop_->quit();
 }
 

@@ -42,7 +42,8 @@ void TcpServer::newConnection (int sockfd,const Address& peerAddr) {
 }
 void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
     std::cout << "removeConnection: "<< name_ <<std::endl;
-    connection_.erase(conn->getName()); 
+    size_t n = connection_.erase(conn->getName()); 
+    assert(n == 1);
     loop_->queueLoop(boost::bind(&TcpConnection::connectionClose,conn));
 }
 void TcpServer::start() {

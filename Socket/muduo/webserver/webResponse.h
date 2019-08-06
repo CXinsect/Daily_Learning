@@ -27,16 +27,22 @@ class webResponse : public disCription {
   void setHttpCodeStatus(HttpCode status) { httpcodestatus_ = status; }
   std::string getFileType();
   ~webResponse() {
-    while (count_) {
-      munmap(fileAddr, BuffSize);
-      count_--;
-      flagsAddr -= BuffSize;
-    }
+    // int i = 1;
+    // while (count_) {
+    //   munmap(fileAddr, BuffSize);
+    //   count_--;
+    //   if(i-- == 1)
+    //      flagsAddr -= tail_;
+    //   flagsAddr -= BuffSize;
+    // }
+    if(fileAddr)
+      munmap(fileAddr,st_.st_size);
     flagsAddr = NULL;
   }
   static char* fileAddr;
   static char *flagsAddr;
   static int count_;
+  static int tail_;
  private:
   webRequest request_;
   // Buffer buffer_;
@@ -48,4 +54,5 @@ class webResponse : public disCription {
 char *webResponse::fileAddr = NULL;
 char *webResponse::flagsAddr = NULL;
 int webResponse::count_ = 0;
+int webResponse::tail_ = 0;
 #endif

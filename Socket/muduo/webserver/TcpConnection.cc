@@ -11,7 +11,7 @@ void TcpConnection::handleRead() {
     handClose();
   } else {
     std::cout << "TcpConnection Error:: handRead" << std::endl;
-    handClose();
+     handClose();
   }
 }
 void TcpConnection::handWrite() {
@@ -23,6 +23,8 @@ void TcpConnection::handWrite() {
       outputBuffer_.retrieve(n);
       if (outputBuffer_.getReadableBytes() == 0) {
         channel_->disableWriteing();
+        //是否会造成 busy Loop
+        // loop_->quit();
         if (state_ == Disconnecting) shutdownInLoop();
       }
     }

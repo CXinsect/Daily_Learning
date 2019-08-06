@@ -60,12 +60,16 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_) {
             if(st_.st_size != 0) {
                 fileResponseAddHead(buffer_,st_.st_size);
                 int n = 0;
-                while(n < count_) {
-                    std::cout << "filesize: " << strlen(fileAddr) << "content" << fileAddr << std::endl;
-                    fileAddr++;
-                    buffer_->Append(fileAddr,strlen(fileAddr));
-                    n++;
-                }
+                // while(n < count_) {
+                //     std::cout << "filesize--: " << strlen(fileAddr) << "content" << fileAddr << std::endl;
+                //     buffer_->Append(fileAddr,st_.st_size);
+                //     n++;
+                //     if(n >= count_)
+                //         break;
+                //     fileAddr += BuffSize;
+                // }
+                std::string tmp (fileAddr,st_.st_size);
+                buffer_->Append(tmp.c_str(),tmp.size());
             }
             else {
                 const std::string emptyFile = "<html><body></body></html>";
