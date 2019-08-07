@@ -14,6 +14,9 @@ Server::Server(EventLoop* loop,
 void Server::onConnection (const TcpConnectionPtr& conn) {
     if(conn->isConnected()) {
         std::cout << "New Connection " << "[name: " << conn->getName() << std::endl; 
+        fastcgi_.FastCgi_init();
+        fastcgi_.setRequestId(1);
+        fastcgi_.startConnect();
         std::shared_ptr<webRequest> ptr_ (new webRequest);
         conn->setRequest(ptr_);
     }
@@ -25,15 +28,15 @@ void Server::onMessage (const TcpConnectionPtr& conn,
     std::shared_ptr<webRequest>request_ = conn->getRequest();
     request_->setBuffer(*buf);
     std::cout << "bufer::onMessage " << buf->retrieveAllAsString() << std::endl;
-    disCription::HttpCode ret = request_->eventProcess();
-    onRequest(conn,ret);
+    disCription::HttpCode ret = request_->eventProcess(fastcgi_);
+    onRequest(conn,ret,fastcgi_);
 }
 
-void Server::onRequest (const TcpConnectionPtr& conn,disCription::HttpCode status) {
+void Server::onRequest (const TcpConnectionPtr& conn,disCription::HttpCode status,FastCGI &fastcgi_) {
     Buffer *buffer_ = new Buffer;
     webResponse response_;
     response_.setHttpCodeStatus(status);
-    bool flags = response_.fileResponseAssembly(buffer_);
+    bool flags = response_.fileResponseAssembly(buffer_,fastcgi_);
     if(!flags) {
         conn->handClose();
     }

@@ -26,10 +26,11 @@ class Server {
             void onConnection(const TcpConnectionPtr &conn);
             void onMessage(const TcpConnectionPtr& conn,
                             Buffer * buf);
-            void onRequest(const TcpConnectionPtr&,disCription::HttpCode status);
+            void onRequest(const TcpConnectionPtr&,disCription::HttpCode status,FastCGI &fastcgi_);
             TcpServer server_;
             webCallBack webcallback_; 
             EventLoop *loop_;
+            FastCGI fastcgi_;
 };
 
 #endif

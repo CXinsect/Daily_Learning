@@ -24,8 +24,6 @@ void Acceptor::handleRead() {
   pfd.fd = confd;
   pfd.events = POLLRDNORM;
   if (confd >= 0) {
-    // ::poll(&pfd, 0, 0);
-    // if (pfd.revents & POLLOUT) {
       if (newConnectionBack_)
         newConnectionBack_(confd, perrAddr);
       else
@@ -35,5 +33,4 @@ void Acceptor::handleRead() {
         if(errno == EMFILE)
             ::close(confd);
     }
-//   }
 }

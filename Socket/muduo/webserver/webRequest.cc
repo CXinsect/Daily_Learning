@@ -1,6 +1,5 @@
 #include "webRequest.h"
-
-
+class FastCGI;
 webRequest::LineStatus webRequest::parseLine() {
     char temp;
     checkIndex_ = buffer_.getDateBegin(-1);
@@ -40,6 +39,7 @@ webRequest::HttpCode webRequest::parseRequestLine (std::string& text) {
     } else if(method == "POST")
         method = POST;
     else return BadRequest;
+    methodcgi = method;
     url_ = text.substr(pos+1,text.size());
     text = text.substr(pos+1,text.size());
     int pos2 = url_.find_first_of(" ");
@@ -91,6 +91,7 @@ webRequest::HttpCode webRequest::parseHeader(std::string& text) {
         int pos2 = text.find_first_of("\r");
         std::string tmpcontent = text.substr(pos,pos2-1);
         text = text.substr(pos2+2,text.size());
+        contentlen_ = tmpcontent;
         contentLength_ = atol(tmpcontent.c_str());
         std::cout << "Post::Content-Length: " << contentLength_ << std::endl;
     }
@@ -117,6 +118,7 @@ webRequest::HttpCode webRequest::parseContext(std::string& text) {
         postContent_ = text.substr(pos+1,text.size());
         //默认采取禁止访问暂取消验证
         if(postContent_.size() != 0)
+            // return GetRequest;
             return ForbidenRequest;
         else 
             return GetRequest;
@@ -128,6 +130,26 @@ webRequest::HttpCode  webRequest::requestAction() {
     int pos = url_.find_last_of("/");
     filename_ = url_.substr(pos+1,url_.size());
     std::cout << "Filename: " << filename_ << std::endl;
+    if(filename_.find(".php") != string::npos) {
+        fastcgi_.sendStartRequestRecord();
+        fastcgi_.sendParams(const_cast<char*>("SCRIPT_FILENAME"),const_cast<char*>("/home/insect/code/NetWork/webserver/php/Original.php"));
+        fastcgi_.sendParams(const_cast<char*>("REQUEST_METHOD"),const_cast<char*>(methodcgi.c_str()));
+        fastcgi_.sendParams(const_cast<char*>("CONTENT_LENGTH"),const_cast<char*>(contentlen_.c_str()));
+        fastcgi_.sendParams(const_cast<char*>("CONTENT_TYPE"),const_cast<char*>("application/x-www-form-urlencoded"));
+        fastcgi_.sendEndRequestRecord();
+        if(contentLength_ != 0) {
+            FCGI_Header begin = fastcgi_.makeHeader(FCGI_STDIN, fastcgi_.getrequestId(),contentLength_, 0);
+            send(fastcgi_.getSockfd(),&begin,sizeof(begin),0);
+            send(fastcgi_.getSockfd(),const_cast<char*>(contentlen_.c_str()),contentLength_,0);
+            FCGI_Header end = fastcgi_.makeHeader(FCGI_STDIN,fastcgi_.getrequestId(),0,0);
+            send(fastcgi_.getSockfd(),&end,sizeof(end),0);
+        }
+        cgiReply_ = fastcgi_.readFromPhp();
+        std::cout << "FastCGI Reply " << std::endl;
+        fastcgi_.FastCgi_destory();
+        std::cout << "FastCGI has been sent " << std::endl;
+        return FileRequest;
+    }
     std::cout << "Default File Path: " << filePath << std::endl;
     // struct stat st;
     if(stat(filePath.c_str(),&st_) < 0)  return NoResource;
@@ -172,10 +194,11 @@ webRequest::HttpCode  webRequest::requestAction() {
     // contentLength = st_.st_size;
     return FileRequest;
 }
-webRequest::HttpCode webRequest::eventProcess() {
+webRequest::HttpCode webRequest::eventProcess(FastCGI &fastcgi) {
     LineStatus linestatus = LineStatusOk;
     disCription::HttpCode httpcode = NoRequest;
     std::string text = std::string();
+    fastcgi_ = fastcgi;
     while(((checkstate_ == CheckStateContent) &&
             (linestatus == LineStatusOk)) ||
             ((linestatus = parseLine()) == LineStatusOk))
@@ -194,7 +217,9 @@ webRequest::HttpCode webRequest::eventProcess() {
             case CheckStateHeader: {
                 httpcode = parseHeader(requeseBuffer_);
                 if(httpcode == BadRequest) return BadRequest;
-                else if(httpcode == GetRequest) //处理请求
+                else if(httpcode == GetRequest)
+                    ;
+                //处理请求
                 break;
             }
             case CheckStateContent: {

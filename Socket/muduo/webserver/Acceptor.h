@@ -13,6 +13,7 @@ class Acceptor {
         }
         bool listenning() const { return listening_; }
         void Listen();
+        // const int getConn() { return conn_; }
     private:
         void handleRead();
         EventLoop *loop_;
@@ -20,5 +21,6 @@ class Acceptor {
         Channel acceptChannel_;
         NewConnectionCallBack newConnectionBack_;
         bool listening_;
+        int conn_;
 };
 #endif

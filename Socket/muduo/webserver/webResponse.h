@@ -11,6 +11,7 @@
 #include "TcpServer.h"
 #include "disCription.h"
 #include "webRequest.h"
+// #include "FastCGI/FastCGI.h"
 const std::string Version = "HTTP/1.1";
 
 class webResponse : public disCription {
@@ -23,7 +24,7 @@ class webResponse : public disCription {
   HttpCode requestAction(void);
   // bool fileResponseWrite(const TcpConnectionPtr &conn_,Buffer*buffer_);
   void fileResponseAddHead(Buffer *buffer_,int length_);
-  bool fileResponseAssembly(Buffer *buffer_);
+  bool fileResponseAssembly(Buffer *buffer_,FastCGI &fastcgi);
   void setHttpCodeStatus(HttpCode status) { httpcodestatus_ = status; }
   std::string getFileType();
   ~webResponse() {
@@ -50,6 +51,7 @@ class webResponse : public disCription {
   char buf_[64];
   HttpCode httpcodestatus_;
   std::string title_;
+  FastCGI fastcgi_;
 };
 char *webResponse::fileAddr = NULL;
 char *webResponse::flagsAddr = NULL;
