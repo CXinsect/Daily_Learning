@@ -37,7 +37,9 @@ webRequest::HttpCode webRequest::parseRequestLine (std::string& text) {
     std::cout << "webRequest::method " << method << std::endl;
     if(method == "GET") {
         method_ = GET;
-    } else return BadRequest;
+    } else if(method == "POST")
+        method = POST;
+    else return BadRequest;
     url_ = text.substr(pos+1,text.size());
     text = text.substr(pos+1,text.size());
     int pos2 = url_.find_first_of(" ");
@@ -63,8 +65,9 @@ webRequest::HttpCode webRequest::parseRequestLine (std::string& text) {
 }
 webRequest::HttpCode webRequest::parseHeader(std::string& text) {
     std::cout << "webrequestL::parseHeader " << std::endl;
+    int position;
     if(text[0] == '0') {
-        if(messageLength_ != 0) {
+        if(contentLength_ != 0) {
             checkstate_ = CheckStateContent;
             return NoRequest;
         }
@@ -81,32 +84,42 @@ webRequest::HttpCode webRequest::parseHeader(std::string& text) {
         std::cout << "Request::host_: " << host_ << std::endl;
 
     }
-    if(strncasecmp(text.c_str(),"Connection:",11) == 0) {
+    if((position = text.find("Content-Length:")) != std::string::npos) {
+        
+        text = text.substr(position+15,text.size());
+        int pos = text.find_first_not_of(" ");
+        int pos2 = text.find_first_of("\r");
+        std::string tmpcontent = text.substr(pos,pos2-1);
+        text = text.substr(pos2+2,text.size());
+        contentLength_ = atol(tmpcontent.c_str());
+        std::cout << "Post::Content-Length: " << contentLength_ << std::endl;
+    }
+     if(strncasecmp(text.c_str(),"Connection:",11) == 0) {
         text = text.substr(11,text.size());
         int pos = text.find_first_not_of(" ");
-        std::string tmpcontent = text.substr(pos,pos+10);
+        std::string tmpcontent = text.substr(pos,pos+9);
         text = text.substr(pos+12,text.size());
         std::cout << "Request::Connection: " << tmpcontent << std::endl;
-        if(strcasecmp(text.c_str(),"keep-alive") == 0)
+        if(strcasecmp(tmpcontent.c_str(),"keep-alive") == 0)
             link_ = true;
     }
-    // if(strncasecmp(text.c_str(),"Cache-Control:",14) == 0) {
-    //     text = text.substr(14,text.size());
-    //     int pos = text.find_first_not_of(" ");
-    //     int pos2 = text.find_first_of("\r");
-    //     std::string tmpcachecontrol = text.substr(pos,pos2-1);
-    //     text = text.substr(pos2+2,text.size());
-    //     contentLength_ = atol(tmpcachecontrol.c_str());
-    //     std::cout << "Request::Content-Length: " << contentLength_ << std::endl;
-    // }
     else {
         std::cout << "Temporarily unprocessed" << std::endl;
     }
+    checkstate_ = CheckStateContent;
     return NoRequest;
 }
 webRequest::HttpCode webRequest::parseContext(std::string& text) {
     if(buffer_.getReadableBytes() == 0) {
-        return GetRequest;
+        //处理body
+        std::cout << "处理body" << std::endl;
+        int pos = text.find_last_of("\n");
+        postContent_ = text.substr(pos+1,text.size());
+        //默认采取禁止访问暂取消验证
+        if(postContent_.size() != 0)
+            return ForbidenRequest;
+        else 
+            return GetRequest;
     }
     return NoRequest;
 }
@@ -179,7 +192,6 @@ webRequest::HttpCode webRequest::eventProcess() {
                 break;
             }
             case CheckStateHeader: {
-                std::cout << "ddddddddddddds"<<std::endl;
                 httpcode = parseHeader(requeseBuffer_);
                 if(httpcode == BadRequest) return BadRequest;
                 else if(httpcode == GetRequest) //处理请求
@@ -188,6 +200,7 @@ webRequest::HttpCode webRequest::eventProcess() {
             case CheckStateContent: {
                 httpcode = parseContext(requeseBuffer_);
                 if(httpcode == GetRequest) return requestAction();
+                else if(httpcode == ForbidenRequest) return ForbidenRequest;
                 linestatus = LineStatusOpen;
                 break;
             }

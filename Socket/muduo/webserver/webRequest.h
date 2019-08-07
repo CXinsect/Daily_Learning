@@ -38,6 +38,7 @@ class webRequest :public disCription {
         std::string host_;
         int messageLength_;
         int contentLength_;
+        std::string postContent_;
         std::string requeseBuffer_;
         TcpConnectionPtr conn_;
         Buffer buffer_;
