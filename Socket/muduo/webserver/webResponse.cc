@@ -19,9 +19,9 @@ void webResponse::fileResponseAddHead(Buffer *buffer_, int length_) {
 }
 void webResponse::fileResponseAddHead(Buffer *buffer_, std::string &cgiReply_) {
   int position;
-  memset(buf_,0,sizeof(buf_));
+  memset(buf_, 0, sizeof(buf_));
   if ((position = cgiReply_.find("Status:")) != std::string::npos) {
-    cgiReply_ = cgiReply_.substr(position+7, cgiReply_.size());
+    cgiReply_ = cgiReply_.substr(position + 7, cgiReply_.size());
     int pos = cgiReply_.find_first_not_of(" ");
     cgiStatus_ = cgiReply_.substr(pos, 3);
   }
@@ -30,18 +30,18 @@ void webResponse::fileResponseAddHead(Buffer *buffer_, std::string &cgiReply_) {
   buffer_->Append(buf_, strlen(buf_));
   memset(buf_, 0, sizeof(buf_));
   if ((position = cgiReply_.find("Content-type:")) != std::string::npos) {
-    cgiReply_ = cgiReply_.substr(position+13,cgiReply_.size());
+    cgiReply_ = cgiReply_.substr(position + 13, cgiReply_.size());
     int pos = cgiReply_.find_first_not_of(" ");
-    // int pos2 = cgiReply_.find_first_of(";");
     cgiContentType_ = cgiReply_.substr(pos, 24);
-    snprintf(buf_, sizeof(buf_), "Content-Type: %s\r\n", cgiContentType_.c_str());
+    snprintf(buf_, sizeof(buf_), "Content-Type: %s\r\n",
+             cgiContentType_.c_str());
     buffer_->Append(buf_, strlen(buf_));
     memset(buf_, 0, sizeof(buf_));
     int pos2 = cgiReply_.find_first_of("\n");
-    // cgiReply_ = cgiReply_.substr(pos2,pos2+2);
     int pos3 = cgiReply_.find_last_of("\n");
     cgiContent_ = cgiReply_.substr(pos2 + 2, pos3);
-    snprintf(buf_, sizeof(buf_), "Content-Length: %d\r\n", static_cast<int>(cgiContent_.size()));
+    snprintf(buf_, sizeof(buf_), "Content-Length: %d\r\n",
+             static_cast<int>(cgiContent_.size()));
     buffer_->Append(buf_, strlen(buf_));
     memset(buf_, 0, sizeof(buf_));
     snprintf(buf_, sizeof(buf_), "\r\n");
@@ -92,7 +92,7 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi) {
       do {
         std::cout << "FileRequest" << std::endl;
         if (cgiReply_.size() != 0) {
-          std::cout << " FastCGI回复 " << std::endl;
+          std::cout << " FastCGI回复 :==>>" << cgiReply_ << std::endl;
           fileResponseAddHead(buffer_, cgiReply_);
           buffer_->Append(cgiContent_.c_str(), cgiContent_.size());
           break;

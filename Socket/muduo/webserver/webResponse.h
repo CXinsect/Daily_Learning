@@ -23,10 +23,10 @@ class webResponse : public disCription {
   const std::string _500 = "Internal Error";
   HttpCode requestAction(void);
   // bool fileResponseWrite(const TcpConnectionPtr &conn_,Buffer*buffer_);
-  void fileResponseAddHead(Buffer *buffer_,int length_);
-  void fileResponseAddHead(Buffer *buffer_,std::string &cgiReply_);
-  bool fileResponseAssembly(Buffer *buffer_,FastCGI &fastcgi);
-  void setHttpCodeStatus(HttpCode status) { httpcodestatus_ = status; }
+  void fileResponseAddHead(Buffer *buffer_, int length_);
+  void fileResponseAddHead(Buffer *buffer_, std::string &cgiReply_);
+  bool fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi);
+  void setHttpCodeStatus(HttpCode &status) { httpcodestatus_ = status; }
   std::string getFileType();
   ~webResponse() {
     // int i = 1;
@@ -37,14 +37,14 @@ class webResponse : public disCription {
     //      flagsAddr -= tail_;
     //   flagsAddr -= BuffSize;
     // }
-    if(fileAddr)
-      munmap(fileAddr,st_.st_size);
+    if (fileAddr) munmap(fileAddr, st_.st_size);
     flagsAddr = NULL;
   }
-  static char* fileAddr;
+  static char *fileAddr;
   static char *flagsAddr;
   static int count_;
   static int tail_;
+
  private:
   webRequest request_;
   // Buffer buffer_;

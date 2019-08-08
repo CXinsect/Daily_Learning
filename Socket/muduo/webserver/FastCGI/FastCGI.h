@@ -100,10 +100,11 @@ class FastCGI {
   FastCGI() { c = new FastCgi_t; }
   ~FastCGI() {
 
-    if (c != NULL) { ::close(c->sockfd_); delete c;}
+    if (c != NULL) { delete c;}
   }
   // FastCGI的初始化
   void FastCgi_init();
+  void FastCgi_destory() { ::close(c->sockfd_); }
   //设置请求Id
   void setRequestId(int requestId);
   //生成头部

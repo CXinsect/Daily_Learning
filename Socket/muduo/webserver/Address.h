@@ -5,6 +5,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/implicit_cast.hpp>
 #include <string>
+#include <netinet/in.h>
 class Address {
     public:
         explicit Address (short port = 0,bool loopbackOnly = false);

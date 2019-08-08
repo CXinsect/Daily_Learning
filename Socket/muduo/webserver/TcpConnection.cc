@@ -11,7 +11,7 @@ void TcpConnection::handleRead() {
     handClose();
   } else {
     std::cout << "TcpConnection Error:: handRead" << std::endl;
-     handClose();
+    // handClose();
   }
 }
 void TcpConnection::handWrite() {
@@ -23,7 +23,7 @@ void TcpConnection::handWrite() {
       outputBuffer_.retrieve(n);
       if (outputBuffer_.getReadableBytes() == 0) {
         channel_->disableWriteing();
-        //busy Loop
+        // busy Loop
         // loop_->quit();
         if (state_ == Disconnecting) shutdownInLoop();
       }
@@ -33,16 +33,23 @@ void TcpConnection::handWrite() {
   }
 }
 void TcpConnection::handClose() {
+  std::cout << "TcpConnection handclose " << channel_->getFd() << std::endl;
   assert(state_ == Connected || state_ == Disconnecting);
   setState(Disconnceted);
   channel_->disableAll();
-  closeCallBack_(shared_from_this());
+
+  //延长生命周期
+  TcpConnectionPtr guard(shared_from_this());
+  connectionCallBack_(guard);
+  closeCallBack_(guard);
 }
 void TcpConnection::connectionClose() {
   assert(state_ == Connected);
-  setState(Disconnceted);
-  channel_->disableAll();
-  connectionCallBack_(shared_from_this());
+  if (state_ == Connected) {
+    setState(Disconnceted);
+    channel_->disableAll();
+    connectionCallBack_(shared_from_this());
+  }
   channel_->remove();
 }
 void TcpConnection::send(const std::string& message) {
@@ -50,14 +57,14 @@ void TcpConnection::send(const std::string& message) {
     sendInLoop(message);
   }
 }
-void TcpConnection::send(Buffer * buffer) {
-  if(state_ == Connected) {
+void TcpConnection::send(Buffer* buffer) {
+  if (state_ == Connected) {
     sendInLoop(buffer->retrieveAllAsString());
   }
 }
 void TcpConnection::sendInLoop(const std::string& message) {
   ssize_t nwrite = 0;
-  std::cout << "Sendinloop:: Messgae : " << message<< std::endl;
+  std::cout << "Sendinloop:: Messgae : " << message << std::endl;
   if (!channel_->isWriteing() && outputBuffer_.getReadableBytes() == 0) {
     std::cout << "writeing" << std::endl;
     nwrite = ::write(channel_->getFd(), message.c_str(), message.size());

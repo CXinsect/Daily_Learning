@@ -24,13 +24,11 @@ void Acceptor::handleRead() {
   pfd.fd = confd;
   pfd.events = POLLRDNORM;
   if (confd >= 0) {
-      if (newConnectionBack_)
-        newConnectionBack_(confd, perrAddr);
-      else
-        sockets::close(confd);
-    }
-    else {
-        if(errno == EMFILE)
-            ::close(confd);
-    }
+    if (newConnectionBack_)
+      newConnectionBack_(confd, perrAddr);
+    else
+      sockets::close(confd);
+  } else {
+    if (errno == EMFILE) ::close(confd);
+  }
 }

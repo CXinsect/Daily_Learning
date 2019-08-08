@@ -46,7 +46,7 @@ void Poller::updateChannel(Channel *channel) {
     std::cout << "fd= " << channel->getFd() << "events= " << channel->getEvents() << std::endl;
     //如果是新事件则加入事件列表
     if(channel->getIndex() < 0) {
-        std::cout << "First" << std::endl;
+        std::cout << "First coming updateChannnel " << std::endl;
         assert(channels_.find(channel->getFd()) == channels_.end());
         struct pollfd pfd;
         pfd.fd = channel->getFd();
@@ -61,7 +61,7 @@ void Poller::updateChannel(Channel *channel) {
     }
     else {
         //否则则更新描述符信息
-        std::cout << "end" << std::endl;
+        std::cout << "update exist Channel " << std::endl;
         assert(channels_.find(channel->getFd()) != channels_.end());
         assert(channels_[channel->getFd()] == channel);
         int id = channel->getIndex();

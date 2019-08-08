@@ -18,14 +18,14 @@
 #include <unistd.h>
 
 #include <assert.h>
+#include <boost/any.hpp>
 #include <boost/bind.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/implicit_cast.hpp>
+#include <boost/is_placeholder.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/is_placeholder.hpp>
-#include <boost/any.hpp>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -37,7 +37,8 @@ class Buffer;
 typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 typedef std::function<void(const TcpConnectionPtr&)> ConnectionCallBack;
-typedef std::function<void(const TcpConnectionPtr&, Buffer *buf)>MessageCallBack;
+typedef std::function<void(const TcpConnectionPtr&, Buffer* buf)>
+    MessageCallBack;
 // typedef void (*MessageCallBack)(const TcpConnectionPtr&, Buffer *buf);
 
 typedef std::function<void(const TcpConnectionPtr&)> CloseCallBack;
