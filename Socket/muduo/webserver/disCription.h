@@ -22,9 +22,13 @@ class disCription {
         static std::string filename_;
         bool link_ = false;
         static struct stat st_;
-        std::string cgiReply_;
+        static std::string cgiReply_;
         const int BuffSize = 4096;
 };
 struct stat disCription::st_;
 std::string disCription::filename_ = std::string();
+std::string disCription::cgiReply_ = std::string();
+// std::string disCription::status_ = std::string();
+// std::string disCription::cgiContentType_ = std::string();
+// std::string  disCription::cgiContent_ = std::string();
 #endif

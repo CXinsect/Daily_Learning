@@ -1,5 +1,6 @@
 #include "/home/insect/code/NetWork/webserver/FastCGI/FastCGI.h"
 #include ".././Universal_head.h"
+#include<iostream>
 
 static const int PARAMS_BUFF_LEN = 2048;   //环境参数buffer的大小
 static const int CONTENT_BUFF_LEN = 2048;  //内容buffer的大小
@@ -9,8 +10,6 @@ void FastCGI::FastCgi_init() {
   c->flag_ = 0;       // record 里的请求ID
   c->requestId_ = 0;  //用来标志当前读取内容是否为html内容
 }
-
-void FastCGI::FastCgi_destory() { ::close(c->sockfd_); }
 
 void FastCGI::setRequestId(int requestId) {
   c->requestId_ = requestId;
@@ -119,7 +118,7 @@ int FastCGI::sendStartRequestRecord() {
 
 int FastCGI::sendParams(char *name, char *value) {
   int rc;
-
+  
   unsigned char bodyBuff[PARAMS_BUFF_LEN];
 
   bzero(bodyBuff, sizeof(bodyBuff));
@@ -174,7 +173,6 @@ char *FastCGI::readFromPhp() {
       contentLen = (responderHeader.contentLengthB1 << 8) +
                    (responderHeader.contentLengthB0);
       bzero(content, CONTENT_BUFF_LEN);
-
       ret = ::read(c->sockfd_, content, contentLen);
 
       assert(ret == contentLen);

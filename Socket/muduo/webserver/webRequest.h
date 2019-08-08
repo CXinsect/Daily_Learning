@@ -43,6 +43,7 @@ class webRequest :public disCription {
         std::string contentlen_;
         std::string postContent_;
         std::string requeseBuffer_;
+        std::string cgiUrl_;
         TcpConnectionPtr conn_;
         Buffer buffer_;
         FastCGI fastcgi_;

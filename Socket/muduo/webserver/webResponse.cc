@@ -3,8 +3,8 @@
 void webResponse::fileResponseAddHead(Buffer *buffer_, int length_) {
   std::cout << "hello" << std::endl;
   memset(buf_, 0, sizeof(buf_));
-  std::cout << "filetype: ======>>> " << getFileType() << std::endl;
   snprintf(buf_, sizeof(buf_), "Content-Type: %s\r\n", getFileType().c_str());
+  buffer_->Append(buf_, strlen(buf_));
   memset(buf_, 0, sizeof(buf_));
   snprintf(buf_, sizeof(buf_), "Content-Length: %d\r\n", length_);
   buffer_->Append(buf_, strlen(buf_));
@@ -16,6 +16,37 @@ void webResponse::fileResponseAddHead(Buffer *buffer_, int length_) {
   snprintf(buf_, sizeof(buf_), "\r\n");
   buffer_->Append(buf_, strlen(buf_));
   // buffer_.Append(fileAddr,strlen(fileAddr));
+}
+void webResponse::fileResponseAddHead(Buffer *buffer_, std::string &cgiReply_) {
+  int position;
+  memset(buf_,0,sizeof(buf_));
+  if ((position = cgiReply_.find("Status:")) != std::string::npos) {
+    cgiReply_ = cgiReply_.substr(position+7, cgiReply_.size());
+    int pos = cgiReply_.find_first_not_of(" ");
+    cgiStatus_ = cgiReply_.substr(pos, 3);
+  }
+  snprintf(buf_, sizeof(buf_), "%s %d %s\r\n", Version.c_str(),
+           atoi(cgiStatus_.c_str()), "discription");
+  buffer_->Append(buf_, strlen(buf_));
+  memset(buf_, 0, sizeof(buf_));
+  if ((position = cgiReply_.find("Content-type:")) != std::string::npos) {
+    cgiReply_ = cgiReply_.substr(position+13,cgiReply_.size());
+    int pos = cgiReply_.find_first_not_of(" ");
+    // int pos2 = cgiReply_.find_first_of(";");
+    cgiContentType_ = cgiReply_.substr(pos, 24);
+    snprintf(buf_, sizeof(buf_), "Content-Type: %s\r\n", cgiContentType_.c_str());
+    buffer_->Append(buf_, strlen(buf_));
+    memset(buf_, 0, sizeof(buf_));
+    int pos2 = cgiReply_.find_first_of("\n");
+    // cgiReply_ = cgiReply_.substr(pos2,pos2+2);
+    int pos3 = cgiReply_.find_last_of("\n");
+    cgiContent_ = cgiReply_.substr(pos2 + 2, pos3);
+    snprintf(buf_, sizeof(buf_), "Content-Length: %d\r\n", static_cast<int>(cgiContent_.size()));
+    buffer_->Append(buf_, strlen(buf_));
+    memset(buf_, 0, sizeof(buf_));
+    snprintf(buf_, sizeof(buf_), "\r\n");
+    buffer_->Append(buf_, strlen(buf_));
+  }
 }
 bool webResponse::fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi) {
   std::cout << "fileresponse " << std::endl;
@@ -58,21 +89,21 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi) {
       return true;
     }
     case FileRequest: {
-      memset(buf_, 0, sizeof(buf_));
-      snprintf(buf_, sizeof(buf_), "%s %d %s\r\n", Version.c_str(), 200,
-               Ok.c_str());
-      std::cout << strlen(buf_) << std::endl;
-      std::string tmp = buf_;
-      // std::cout << buffer_->retrieveAllAsString() << std::endl;
-      buffer_->Append(tmp.c_str(), tmp.size());
       do {
-       
-        if(cgiReply_.size() != 0) {
-             std::cout << " FastCGI回复 " << std::endl;
-            fileResponseAddHead(buffer_, cgiReply_.size());
-            buffer_->Append(cgiReply_.c_str(),cgiReply_.size());
-            break;
+        std::cout << "FileRequest" << std::endl;
+        if (cgiReply_.size() != 0) {
+          std::cout << " FastCGI回复 " << std::endl;
+          fileResponseAddHead(buffer_, cgiReply_);
+          buffer_->Append(cgiContent_.c_str(), cgiContent_.size());
+          break;
         }
+        memset(buf_, 0, sizeof(buf_));
+        snprintf(buf_, sizeof(buf_), "%s %d %s\r\n", Version.c_str(), 200,
+                 Ok.c_str());
+        std::cout << strlen(buf_) << std::endl;
+        std::string tmp = buf_;
+        // std::cout << buffer_->retrieveAllAsString() << std::endl;
+        buffer_->Append(tmp.c_str(), tmp.size());
         if (st_.st_size != 0) {
           fileResponseAddHead(buffer_, st_.st_size);
           int n = 0;
@@ -85,6 +116,7 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi) {
           //     fileAddr += BuffSize;
           // }
           std::string tmp(fileAddr, st_.st_size);
+          std::cout << "file page ===>>> " << st_.st_size << std::endl;
           buffer_->Append(tmp.c_str(), tmp.size());
         } else {
           const std::string emptyFile = "<html><body></body></html>";
@@ -110,6 +142,7 @@ std::string webResponse::getFileType() {
     return "text/html; charset=utf-8";
   if (strcmp(dot, ".jpg") == 0 || strcmp(dot, ".jpeg") == 0)
     return "image/jpeg";
+  if (strcmp(dot, ".pdf") == 0) return "application/pdf";
   if (strcmp(dot, ".png") == 0) return "image/png";
   if (strcmp(dot, ".gif") == 0) return "image/gif";
   if (strcmp(dot, ".wav") == 0) return "audio/wav";

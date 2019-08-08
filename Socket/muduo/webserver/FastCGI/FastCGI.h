@@ -1,6 +1,6 @@
 #ifndef _FASTCGI_H_
 #define _FASTCGI_H_
-#include <iostream>
+#include <unistd.h>
 typedef struct {
   unsigned char version;      //版本
   unsigned char type;         //操作类型
@@ -99,12 +99,11 @@ class FastCGI {
  public:
   FastCGI() { c = new FastCgi_t; }
   ~FastCGI() {
-    if (c != NULL) delete c;
+
+    if (c != NULL) { ::close(c->sockfd_); delete c;}
   }
   // FastCGI的初始化
   void FastCgi_init();
-  // FastCGI的关闭
-  void FastCgi_destory();
   //设置请求Id
   void setRequestId(int requestId);
   //生成头部

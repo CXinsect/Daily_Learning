@@ -34,18 +34,20 @@ webRequest::HttpCode webRequest::parseRequestLine (std::string& text) {
     int pos = text.find_first_of(" \t");
     std::string method = text.substr(0,pos);
     std::cout << "webRequest::method " << method << std::endl;
+    methodcgi = method.substr(0,method.size());
     if(method == "GET") {
         method_ = GET;
     } else if(method == "POST")
         method = POST;
     else return BadRequest;
-    methodcgi = method;
+    std::cout << "action------->>>" << methodcgi << std::endl;
     url_ = text.substr(pos+1,text.size());
     text = text.substr(pos+1,text.size());
     int pos2 = url_.find_first_of(" ");
     version_ = url_.substr(pos2+1,url_.size());
     text = text.substr(pos2+1,text.size());
     url_ = url_.substr(0,pos2);
+    cgiUrl_ = url_;
     if(url_.size() == 0) return BadRequest;
     std::cout << "webRequest::url " << url_ << std::endl;
     // int pos3 = version_.find_first_of(" \t");
@@ -118,8 +120,8 @@ webRequest::HttpCode webRequest::parseContext(std::string& text) {
         postContent_ = text.substr(pos+1,text.size());
         //默认采取禁止访问暂取消验证
         if(postContent_.size() != 0)
-            // return GetRequest;
-            return ForbidenRequest;
+            return GetRequest;
+            // return ForbidenRequest;
         else 
             return GetRequest;
     }
@@ -128,25 +130,32 @@ webRequest::HttpCode webRequest::parseContext(std::string& text) {
 webRequest::HttpCode  webRequest::requestAction() {
     filePath = url_;
     int pos = url_.find_last_of("/");
+    int pos2 = url_.find_first_of("?");
+    if(pos2 != std::string::npos) {
+        cgiUrl_ = cgiUrl_.substr(0,pos2);
+        url_ = url_.substr(0,pos2);
+    }
     filename_ = url_.substr(pos+1,url_.size());
     std::cout << "Filename: " << filename_ << std::endl;
     if(filename_.find(".php") != string::npos) {
+        signal(SIGPIPE,SIG_IGN);
         fastcgi_.sendStartRequestRecord();
-        fastcgi_.sendParams(const_cast<char*>("SCRIPT_FILENAME"),const_cast<char*>("/home/insect/code/NetWork/webserver/php/Original.php"));
+        std::cout << "test" << fastcgi_.getSockfd() << std::endl;
+        std::cout << "cgiUrl_" << cgiUrl_ << std::endl;
+        fastcgi_.sendParams(const_cast<char*>("SCRIPT_FILENAME"),const_cast<char*>(cgiUrl_.c_str()));
         fastcgi_.sendParams(const_cast<char*>("REQUEST_METHOD"),const_cast<char*>(methodcgi.c_str()));
         fastcgi_.sendParams(const_cast<char*>("CONTENT_LENGTH"),const_cast<char*>(contentlen_.c_str()));
         fastcgi_.sendParams(const_cast<char*>("CONTENT_TYPE"),const_cast<char*>("application/x-www-form-urlencoded"));
         fastcgi_.sendEndRequestRecord();
         if(contentLength_ != 0) {
             FCGI_Header begin = fastcgi_.makeHeader(FCGI_STDIN, fastcgi_.getrequestId(),contentLength_, 0);
-            send(fastcgi_.getSockfd(),&begin,sizeof(begin),0);
+            int ret = send(fastcgi_.getSockfd(),&begin,sizeof(begin),0);
+
             send(fastcgi_.getSockfd(),const_cast<char*>(contentlen_.c_str()),contentLength_,0);
             FCGI_Header end = fastcgi_.makeHeader(FCGI_STDIN,fastcgi_.getrequestId(),0,0);
             send(fastcgi_.getSockfd(),&end,sizeof(end),0);
         }
-        cgiReply_ = fastcgi_.readFromPhp();
-        std::cout << "FastCGI Reply " << std::endl;
-        fastcgi_.FastCgi_destory();
+        disCription::cgiReply_ = fastcgi_.readFromPhp();
         std::cout << "FastCGI has been sent " << std::endl;
         return FileRequest;
     }

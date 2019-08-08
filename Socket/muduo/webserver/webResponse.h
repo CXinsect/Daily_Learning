@@ -24,6 +24,7 @@ class webResponse : public disCription {
   HttpCode requestAction(void);
   // bool fileResponseWrite(const TcpConnectionPtr &conn_,Buffer*buffer_);
   void fileResponseAddHead(Buffer *buffer_,int length_);
+  void fileResponseAddHead(Buffer *buffer_,std::string &cgiReply_);
   bool fileResponseAssembly(Buffer *buffer_,FastCGI &fastcgi);
   void setHttpCodeStatus(HttpCode status) { httpcodestatus_ = status; }
   std::string getFileType();
@@ -52,6 +53,9 @@ class webResponse : public disCription {
   HttpCode httpcodestatus_;
   std::string title_;
   FastCGI fastcgi_;
+  std::string cgiStatus_;
+  std::string cgiContentType_;
+  std::string cgiContent_;
 };
 char *webResponse::fileAddr = NULL;
 char *webResponse::flagsAddr = NULL;
