@@ -11,8 +11,9 @@ Poller::Poller(EventLoop *loop) : owerLoop_(loop) {}
 Poller::~Poller() {std::cout << "ddd" << std::endl;};
 
 void Poller::poll(int timeoutMs,ChannelList *activeChannels) {
-    int numEvents = ::poll(&*pollfds_.begin(),pollfds_.size(),-1);
-
+    std::cout << "Comming in Poll" << std::endl;
+    std::cout << "pollsize" << pollfds_.size() << std::endl;    
+    int numEvents = ::poll(&*pollfds_.begin(),pollfds_.size(),5);
     if(numEvents > 0) {
         std::cout << "active Channels" << numEvents << std::endl;
         fillActiveChannels(numEvents,activeChannels);

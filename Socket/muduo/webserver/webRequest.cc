@@ -31,6 +31,7 @@ webRequest::LineStatus webRequest::parseLine() {
 }
 webRequest::HttpCode webRequest::parseRequestLine(std::string& text) {
   std::cout << "webRequest::parseRequestLine coming in" << std::endl;
+  std::cout << "webRequest::whywhywhy===========>>>>>" << text  << std::endl;
   int pos = text.find_first_of(" \t");
   std::string method = text.substr(0, pos);
   std::cout << "webRequest::method " << method << std::endl;
@@ -75,12 +76,12 @@ webRequest::HttpCode webRequest::parseHeader(std::string& text) {
     }
     return GetRequest;
   }
-  if (strncasecmp(text.c_str(), "Host:", 5) == 0) {
-    text = text.substr(5, text.size());
+  if ((position = text.find("Host:")) != std::string::npos) {
+    text = text.substr(position+5, text.size());
     int pos = text.find_first_not_of(" ");
-    int pos2 = text.find_first_of("\r");
-    std::string tmp = text.substr(pos, pos2 - 1);
-    text = text.substr(pos2 + 2, text.size());
+    int pos2 = text.find_first_of("Connection");
+    std::string tmp = text.substr(pos, pos2 - 3);
+    text = text.substr(pos2, text.size());
     host_ = tmp;
 
     std::cout << "Request::host_: " << host_ << std::endl;
@@ -95,8 +96,8 @@ webRequest::HttpCode webRequest::parseHeader(std::string& text) {
     contentLength_ = atol(tmpcontent.c_str());
     std::cout << "Post::Content-Length: " << contentLength_ << std::endl;
   }
-  if (strncasecmp(text.c_str(), "Connection:", 11) == 0) {
-    text = text.substr(11, text.size());
+  if ((position = text.find("Connection:")) != std::string::npos) {
+    text = text.substr(position+11, text.size());
     int pos = text.find_first_not_of(" ");
     std::string tmpcontent = text.substr(pos, pos + 9);
     text = text.substr(pos + 12, text.size());
@@ -134,6 +135,8 @@ webRequest::HttpCode webRequest::requestAction() {
   std::cout << "Filename: " << filename_ << std::endl;
   if (filename_.find(".php") != string::npos) {
     signal(SIGPIPE, SIG_IGN);
+    fastcgi_.setRequestId(1);
+    fastcgi_.startConnect();
     fastcgi_.sendStartRequestRecord();
     std::cout << "test" << fastcgi_.getSockfd() << std::endl;
     std::cout << "cgiUrl_" << cgiUrl_ << std::endl;
@@ -245,6 +248,7 @@ webRequest::HttpCode webRequest::eventProcess(FastCGI& fastcgi) {
         break;
       }
       case CheckStateContent: {
+        checkstate_ = CheckStateRequestLine;
         httpcode = parseContext(requeseBuffer_);
         if (httpcode == GetRequest)
           return requestAction();

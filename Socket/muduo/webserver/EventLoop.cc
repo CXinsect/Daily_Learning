@@ -7,6 +7,7 @@ void EventLoop::loop() {
     looping_ = true;
     quit_ = false;
     while(!quit_) {
+        std::cout << "Loop" << std::endl;
         activeChannels_.clear();
         poller_->poll(-1,&activeChannels_);
         eventHanding_ = true;

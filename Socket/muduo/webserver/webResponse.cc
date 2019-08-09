@@ -5,6 +5,7 @@ void webResponse::fileResponseAddHead(Buffer *buffer_, int length_) {
   memset(buf_, 0, sizeof(buf_));
   snprintf(buf_, sizeof(buf_), "Content-Type: %s\r\n", getFileType().c_str());
   buffer_->Append(buf_, strlen(buf_));
+  filename_.erase(0,filename_.size());
   memset(buf_, 0, sizeof(buf_));
   snprintf(buf_, sizeof(buf_), "Content-Length: %d\r\n", length_);
   buffer_->Append(buf_, strlen(buf_));
@@ -26,7 +27,7 @@ void webResponse::fileResponseAddHead(Buffer *buffer_, std::string &cgiReply_) {
     cgiStatus_ = cgiReply_.substr(pos, 3);
   }
   snprintf(buf_, sizeof(buf_), "%s %d %s\r\n", Version.c_str(),
-           atoi(cgiStatus_.c_str()), "discription");
+           200, "discription");
   buffer_->Append(buf_, strlen(buf_));
   memset(buf_, 0, sizeof(buf_));
   if ((position = cgiReply_.find("Content-type:")) != std::string::npos) {
@@ -95,6 +96,8 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi) {
           std::cout << " FastCGI回复 :==>>" << cgiReply_ << std::endl;
           fileResponseAddHead(buffer_, cgiReply_);
           buffer_->Append(cgiContent_.c_str(), cgiContent_.size());
+          cgiReply_.erase(0,cgiReply_.size());
+
           break;
         }
         memset(buf_, 0, sizeof(buf_));
@@ -118,6 +121,7 @@ bool webResponse::fileResponseAssembly(Buffer *buffer_, FastCGI &fastcgi) {
           std::string tmp(fileAddr, st_.st_size);
           std::cout << "file page ===>>> " << st_.st_size << std::endl;
           buffer_->Append(tmp.c_str(), tmp.size());
+          st_.st_size = 0;
         } else {
           const std::string emptyFile = "<html><body></body></html>";
           buffer_->Append(emptyFile.c_str(), emptyFile.size());
