@@ -1,22 +1,42 @@
+#ifndef _MODEL_H_
+#define _MODEL_H_
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h> /* See NOTES */
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 #include <assert.h>
 #include <functional>
 #include <list>
+#include <boost/implicit_cast.hpp>
 namespace DataStructure {
 
-    typedef int (*ReadCallBack) (struct _EventLoop &eventloop, int fd, std::string clientDate, int mask);
+    typedef int (*FunctionCallBack) (struct _EventLoop &eventloop, int fd, std::string clientDate, int mask);
 
-    typedef int (*WriteCallBack) (struct _EventLoop &eventloop, int fd, std::string clientDate, int mask);
+    // typedef int (*WriteCallBack) (struct _EventLoop &eventloop, int fd, std::string clientDate, int mask);
 
     typedef struct _SocketEvents {
 
         int mask;
 
-        ReadCallBack readcallback_;
+        FunctionCallBack readcallback_;
         
-        WriteCallBack writecallback_;
+        FunctionCallBack writecallback_;
         
         std::string clientDate;
 
@@ -43,6 +63,12 @@ namespace DataStructure {
     const int NoEvent = 0;
     const int ReadEvent = 1;
     const int WriteEvent = 2;
+    
+    const int FileEvents = 3;
+    const int TimeEvents = 4;
+
+    const int Port = 8888;
+    const std::string Ip = "127.0.0.1";
 
 }
 
@@ -87,3 +113,4 @@ namespace clientStatus {
         unsigned long len;
     }list_;
 }
+#endif

@@ -10,25 +10,28 @@
 namespace epoll {
     class Epoll {
         public:
-            Epoll(int epfd, std::shared_ptr<DataStructure::EventLoop>loop, struct epoll_event &events) : epfd_(epfd),
-                loop_(loop)
-{
-    events_->push_back(events);
-}
+            Epoll(DataStructure::EventLoop &loop,int fd, int mask) : loop_(loop),
+                                                                     fd_(fd),
+                                                                     mask_(mask) {}
         void EpollCreate();
         
-        void EpollAddEvent(int fd,int mask);
+        void EpollAddEvent();
         
-        void EpollDelEvent(int fd,int mask);
+        void EpollDelEvent();
         
-        int EpollWaitEvent(struct timeval *timeout);
+        int EpollWaitEvent();
         
         std::string getMultiplexingName() { return "Epoll"; }
         
     private:
+
+        int fd_;
+
+        int mask_;
+
         int epfd_;
        
-        std::shared_ptr<DataStructure::EventLoop> loop_;
+        DataStructure::EventLoop loop_;
         
         std::shared_ptr <std::vector <struct epoll_event>> events_;
     };
