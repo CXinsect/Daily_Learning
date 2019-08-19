@@ -7,11 +7,11 @@
 class redisServerConfig {
     public:
     private:
-        std::string configure_ = std::string();
-        std::string executable_ = std::string();
-        std::string exec_argv_ = std::string();
+        std::string configure_;
+        std::string executable_;
+        std::string exec_argv_;
         std::vector <RedisDataBase::redisDb> db_;
-        std::vector <RedisDataBase::dict> commandTable_;
+        // std::vector <RedisDataBase::dict> commandTable_;
         DataStructure::EventLoop loop_;
 
         int port_ = 8888;

@@ -60,6 +60,28 @@ namespace DataStructure {
         std::string clientDate;
     }EventLoop;
 
+    typedef struct _redisObject {
+        unsigned type:4;
+        unsigned encoding:4;
+        std::string data;
+    }redisObject;
+    
+    typedef std::function<void()> CommandCallBack;
+    typedef struct _redisCommand {
+        std::string orderName;
+        CommandCallBack commandcallback_;
+        int arity;//参数个数
+        std::string sflags; //命令属性
+        int flags; //二进制命令标识
+    }redisCommand;
+
+    DataStructure::redisCommand cmdTable [] {
+            {"get",getCommand,2,"r",0},
+            {"set",setCommand,3,"w",0},
+            {"del",delCommand,2,"w",0},
+            {"bgsave",bgsaveCommand,1,"a",0}
+    };
+    
     const int NoEvent = 0;
     const int ReadEvent = 1;
     const int WriteEvent = 2;
@@ -99,12 +121,11 @@ namespace RedisDataBase {
         long rehashindex;
     }dict;
 
-    typedef struct redisDb {
+    typedef struct _redisDb {
         std::vector <dict> dictable;
         std::vector <dict> expires;
         int id;
     }redisDb;
-   
 }
 namespace clientStatus {
     typedef struct _list {
@@ -113,4 +134,5 @@ namespace clientStatus {
         unsigned long len;
     }list_;
 }
+
 #endif
