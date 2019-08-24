@@ -3,8 +3,12 @@
 class DataBase {
     
     public:
+        DataBase() {};
         DataBase(int db_num): db_num_(db_num) { }
     public:
+        typedef std::map <std::pair<std::string, long long>, std::string> String;
+        typedef std::map <std::pair<std::string, long long>, std::map<std::string, std::string>> Hash;
+        typedef std::map <std::pair<std::string, long long>, std::list<std::string>> List;
         const long long DefaultTime = -2038;
         void addKeySpace(int type, int encoding, const std::string &key,const std::string &value,long long expiresTime);
         void delKeySpace(int type, const std::string &key);
@@ -17,6 +21,11 @@ class DataBase {
         bool judgeKeySpaceExpiresTime(int type,const std::string &key);
         void deleteKeySpaceExpireTime(int type, const std::string &key);
         long long RemainingSurvivalTime(int type,const std::string &key);
+    
+    public:
+        String& getKeySpaceStringObject() { return String_; }
+        Hash& getKeySpaceHashObject() { return Hash_; }
+        List& getKeySpaceListObject() { return List_; }
     private:
         long long  getTimestamp() {
             struct timeval tv;
@@ -37,7 +46,7 @@ class DataBase {
         std::string value_;
         long long expiresTime_ = DefaultTime;
         //键空间中的实际对象
-        std::map <std::pair<std::string, long long>, std::string> String_;
-        std::map <std::pair<std::string, long long>, std::map<std::string, std::string>> Hash_;
-        std::map <std::pair<std::string, long long>, std::list<std::string>> List_;
+        String String_;
+        Hash Hash_;
+        List List_;
 };
