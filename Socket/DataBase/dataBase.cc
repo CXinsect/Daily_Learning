@@ -17,12 +17,12 @@ DataBase::FindString(const std::string &key) {
   return (*ptr);
 }
 std::map<std::pair<std::string, long long>,
-         std::map<std::string, std::string>>::iterator 
+         std::multimap<std::string, std::string>>::iterator 
 DataBase::FindHash(const std::string &key) {
   // std::map<std::pair<std::string, long long>,
   //          std::map<std::string, std::string>>::iterator it = Hash_.begin();
   typedef std::map<std::pair<std::string, long long>,
-                   std::map<std::string, std::string>>::iterator Iterator;
+                   std::multimap<std::string, std::string>>::iterator Iterator;
   std::shared_ptr<Iterator> ptr(new Iterator);
   *ptr = Hash_.begin();
   while (*ptr != Hash_.end()) {
@@ -70,9 +70,9 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
     }
   } else if (type == DataStructure::ObjHash) {
     std::map<std::pair<std::string, long long>,
-             std::map<std::string, std::string>>::iterator it = FindHash(key);
+             std::multimap<std::string, std::string>>::iterator it = FindHash(key);
     if (it == Hash_.end()) {
-      std::map<std::string, std::string> tmp;
+      std::multimap<std::string, std::string> tmp;
       tmp.insert(make_pair(value_, value1_));
       Hash_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
@@ -127,7 +127,7 @@ void DataBase::delKeySpace(int type, const std::string &key) {
     }
   } else if (type == DataStructure::ObjHash) {
     std::map<std::pair<std::string, long long>,
-             std::map<std::string, std::string>>::iterator it = Hash_.begin();
+             std::multimap<std::string, std::string>>::iterator it = Hash_.begin();
     while (it != Hash_.end()) {
       if (it->first.first == key)
         break;
@@ -179,7 +179,7 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         ret = it->second;
     } else if (type == DataStructure::ObjHash) {
       std::map<std::pair<std::string, long long>,
-               std::map<std::string, std::string>>::iterator it = Hash_.begin();
+               std::multimap<std::string, std::string>>::iterator it = Hash_.begin();
       while (it != Hash_.end()) {
         if (it->first.first == key)
           break;
@@ -241,7 +241,7 @@ long long DataBase::getKeySpaceExpiresTime(int type, const std::string &key) {
       ret = it->first.second;
   } else if (type == DataStructure::ObjHash) {
     std::map<std::pair<std::string, long long>,
-             std::map<std::string, std::string>>::iterator it = Hash_.begin();
+             std::multimap<std::string, std::string>>::iterator it = Hash_.begin();
     while (it != Hash_.end()) {
       if (it->first.first == key)
         break;

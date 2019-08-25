@@ -9,12 +9,14 @@ int main (void) {
     data->addKeySpace(DataStructure::ObjList,DataStructure::EncodingRaw,"gender","nini",DataStructure::SpareTire,11);
     data->addKeySpace(DataStructure::ObjList,DataStructure::EncodingRaw,"gender","haha",DataStructure::SpareTire,11);
     data->addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","color","white",11);
-    data->addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","age","12",11);
-    data->addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","height","130",11);
+    data->addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","color","black",11);
+    data->addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","name","cx",11);
+    data->addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","gender","m",11);
+
 
     
-    std::map<std::pair<std::string, long long>,std::map<std::string, std::string>> ::iterator it = data->getKeySpaceHashObject().begin();
-    std::map<std::string, std::string> iter = it->second;
+    std::map<std::pair<std::string, long long>,std::multimap<std::string, std::string>> ::iterator it = data->getKeySpaceHashObject().begin();
+    std::multimap<std::string, std::string> iter = it->second;
     std::cout << "map" << iter.size() << std::endl;
     Persistence filesave(data);
     filesave.CheckStorageConditions();

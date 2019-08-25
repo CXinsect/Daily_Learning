@@ -18,7 +18,7 @@ class Persistence {
         }
     public:
         typedef std::map<std::pair<std::string, long long>,std::string>::iterator StringIterator_;
-        typedef std::map<std::pair<std::string,long long>, std::map<std::string, std::string>>::iterator HashIterator_;
+        typedef std::map<std::pair<std::string,long long>, std::multimap<std::string, std::string>>::iterator HashIterator_;
         typedef std::map<std::pair<std::string, long long>, std::list<std::string>>::iterator ListIteator_; 
     public:
         //Rdb的数据结构

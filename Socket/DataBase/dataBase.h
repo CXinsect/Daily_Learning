@@ -7,7 +7,7 @@ class DataBase {
         DataBase(int db_num): db_num_(db_num) { }
     public:
         typedef std::map <std::pair<std::string, long long>, std::string> String;
-        typedef std::map <std::pair<std::string, long long>, std::map<std::string, std::string>> Hash;
+        typedef std::map <std::pair<std::string, long long>, std::multimap<std::string, std::string>> Hash;
         typedef std::map <std::pair<std::string, long long>, std::list<std::string>> List;
         const long long DefaultTime = -2038;
         void addKeySpace(int type, int encoding, const std::string &key,const std::string &value,const std::string& value1,long long expiresTime);
@@ -34,7 +34,7 @@ class DataBase {
         }
         
     inline std::map <std::pair<std::string, long long>, std::string>::iterator FindString(const std::string &key);
-    inline std::map <std::pair<std::string, long long>, std::map<std::string, std::string>>::iterator FindHash(const std::string &key);
+    inline std::map <std::pair<std::string, long long>, std::multimap<std::string, std::string>>::iterator FindHash(const std::string &key);
     inline std::map<std::pair<std::string, long long>, std::list<std::string>>::iterator FindList(const std::string &);
 
     private:
