@@ -10,7 +10,7 @@ class DataBase {
         typedef std::map <std::pair<std::string, long long>, std::map<std::string, std::string>> Hash;
         typedef std::map <std::pair<std::string, long long>, std::list<std::string>> List;
         const long long DefaultTime = -2038;
-        void addKeySpace(int type, int encoding, const std::string &key,const std::string &value,long long expiresTime);
+        void addKeySpace(int type, int encoding, const std::string &key,const std::string &value,const std::string& value1,long long expiresTime);
         void delKeySpace(int type, const std::string &key);
         std::string getKeySpace(int type, const std::string &key);
         void setKeySpaceExpiresTime(long long expiresTime) { 
@@ -44,6 +44,7 @@ class DataBase {
         int db_num_;
         std::string key_;
         std::string value_;
+        std::string value1_;
         long long expiresTime_ = DefaultTime;
         //键空间中的实际对象
         String String_;

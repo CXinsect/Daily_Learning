@@ -52,11 +52,13 @@ DataBase::FindList(const std::string &key) {
   return (*ptr);
 }
 void DataBase::addKeySpace(int type, int encoding, const std::string &key,
-                           const std::string &value, long long expiresTime) {
+                           const std::string &value,const std::string& value1,
+                           long long expiresTime) {
   type_ = type;
   encoding_ = encoding;
   key_ = key;
   value_ = value;
+  value1_ = value1;
   setKeySpaceExpiresTime(expiresTime);
   if (type_ == DataStructure::ObjString) {
     std::map<std::pair<std::string, long long>, std::string>::iterator it =
@@ -71,19 +73,20 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
              std::map<std::string, std::string>>::iterator it = FindHash(key);
     if (it == Hash_.end()) {
       std::map<std::string, std::string> tmp;
-      tmp.insert(make_pair(key_, value_));
+      tmp.insert(make_pair(value_, value1_));
       Hash_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
-      std::map<std::string, std::string>::iterator iter = it->second.begin();
-      while (iter != it->second.end()) {
-        if (iter->first == key)
-          break;
-        else {
-          iter++;
-        }
-      }
-      //此刻该键值肯定存在
-      iter->second = value;
+      it->second.insert(make_pair(value_,value1_));
+      // std::map<std::string, std::string>::iterator iter = it->second.begin();
+      // while (iter != it->second.end()) {
+      //   if (iter->first == key)
+      //     break;
+      //   else {
+      //     iter++;
+      //   }
+      // }
+      // //此刻该键值肯定存在
+      // iter->second = value;
     }
   } else if (type == DataStructure::ObjList) {
     std::map<std::pair<std::string, long long>,std::list<std::string>>::iterator it = FindList(key);
@@ -94,10 +97,12 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
         List_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
         //更新list的值
-        std::list<std::string>::iterator iter = it->second.begin();
-        while(size-- > 0)
-            iter++;
-        *iter = value;
+        it->second.push_back(value_);
+        
+        // std::list<std::string>::iterator iter = it->second.begin();
+        // while(size-- > 0)
+        //     iter++;
+        // *iter = value;
     }
   } else {
     std::cout << "Unknown type" << std::endl;

@@ -14,7 +14,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h> /* See NOTES */
-#include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/uio.h>
 #include <unistd.h>
 #include <time.h>
@@ -103,6 +103,8 @@ const int TimeEvents = 4;
 //网络配置
 const int Port = 8888;
 const std::string Ip = "127.0.0.1";
+const int saveTime = 60*60;
+const std::string SpareTire = "SPACE";
 
 }  // namespace DataStructure
 
