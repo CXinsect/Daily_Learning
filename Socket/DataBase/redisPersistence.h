@@ -45,5 +45,9 @@ class Persistence {
         std::shared_ptr<class DataBase> database_;
         //rdb的结构
         std::string FixedStructure = Redis+Version;
+        const char k = '#';
+        const char k1 = '@';
+        //hash key
+        const char v = '$';
 };
 #endif
