@@ -29,6 +29,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <boost/scoped_ptr.hpp>
 // #include <unility>
 namespace DataStructure {
 
