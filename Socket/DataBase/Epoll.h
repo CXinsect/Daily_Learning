@@ -11,7 +11,7 @@ class Epoll {
         void epoll(ChannelList *activeChannel);
         void fillActiveChannel(int numEvents, ChannelList* activeChanel);
         void updateChannel(Channel *channel);
-        // void removeChannel(Channel *channel);
+        void removeChannel(Channel *channel);
 
     private:
         typedef std::vector<struct epoll_event> EventList;

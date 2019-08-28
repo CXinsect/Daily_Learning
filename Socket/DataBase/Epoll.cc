@@ -3,7 +3,7 @@
 void Epoll::epoll(ChannelList *activeChannel) {
     int numEvents = ::epoll_wait(epollfd_, &*events_.begin(),static_cast<int>(events_.size()),-1);
     std::cout << strerror(errno) << std::endl;
-    // assert(numEvents > 0);
+    assert(numEvents >= 0);
     if(numEvents > 0) {
         std::cout << "Events Happened: " << numEvents << std::endl;
         fillActiveChannel(numEvents,activeChannel);
@@ -53,8 +53,38 @@ void Epoll::updateChannel(Channel *channel) {
         struct epoll_event &efd = events_[index];
         assert(efd.data.fd == channel->getSockfd() || efd.data.fd == -1);
         efd.events = channel->getEvents();
+        int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_MOD,channel->getSockfd(),&efd);
+        assert(ret == 0);
         // efd.data.ptr = channel;
         if(channel->isNoneEvent())
             efd.data.fd = -1;
+    }
+}
+void Epoll::removeChannel(Channel * channel) {
+    assert(channel_.find(channel->getSockfd()) != channel_.end());
+    assert(channel_[channel->getSockfd()] == channel);
+    assert(channel->isNoneEvent());
+    int index = channel->getIndex();
+    assert(index >= 0 && index <= (int)events_.size());
+    const struct epoll_event &efd = events_[index];
+    (void)efd;
+    assert(efd.events == channel->getEvents());
+    size_t ret = channel_.erase(channel->getSockfd());
+    assert(ret == 1); (void)ret;
+    if(index == (int)events_.size()-1) {
+        events_.pop_back();
+    } else {
+        int channelEnd = events_.back().data.fd;
+        //Swap the element you want to delete with the tail element
+        std::iter_swap(events_.begin()+index,events_.end()-1);
+        if(channelEnd < 0) {
+            channelEnd = -channelEnd-1;
+        }
+        //Update the location of the current element
+        channel_[channelEnd]->setIndex(index);
+        events_.pop_back();
+        //Blessing is not a single disaster
+        int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_DEL,channel->getSockfd(),const_cast<struct epoll_event*>(&efd));
+        assert(ret == 0);
     }
 }
