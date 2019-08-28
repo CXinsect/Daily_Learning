@@ -19,7 +19,7 @@ void Epoll::epoll(ChannelList *activeChannel) {
     return;
 }
 void Epoll::fillActiveChannel(int numEvents, ChannelList *activeChannelList) {
-    assert(numEvents <= activeChannelList->size());
+    assert(numEvents <= events_.size());
     for(int i = 0;i < numEvents; i++) {
         Channel *channel = static_cast<Channel*>(events_[i].data.ptr);
         int sockfd = channel->getSockfd();
@@ -38,6 +38,8 @@ void Epoll::updateChannel(Channel *channel) {
         efd.events = channel->getEvents();
         efd.data.fd = channel->getSockfd();
         efd.data.ptr = channel;
+        int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_ADD,channel->getSockfd(),&efd);
+        assert(ret == 0);
         events_.push_back(efd);
         channel->setIndex((int)events_.size()-1);
         channel_[channel->getSockfd()] = channel;
