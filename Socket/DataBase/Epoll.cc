@@ -39,6 +39,7 @@ void Epoll::updateChannel(Channel *channel) {
         efd.data.fd = channel->getSockfd();
         efd.data.ptr = channel;
         int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_ADD,channel->getSockfd(),&efd);
+        std::cout << "update channel: " << strerror(errno) << std::endl;
         assert(ret == 0);
         events_.push_back(efd);
         channel->setIndex((int)events_.size()-1);
@@ -51,13 +52,14 @@ void Epoll::updateChannel(Channel *channel) {
         int index = channel->getIndex();
         assert(index >= 0 && index <= (int)events_.size());
         struct epoll_event &efd = events_[index];
-        assert(efd.data.fd == channel->getSockfd() || efd.data.fd == -1);
+        Channel *channelptr = (Channel*)efd.data.ptr;
+        assert(channelptr->getSockfd() == channel->getSockfd() || channelptr->getSockfd() == -1);
         efd.events = channel->getEvents();
         int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_MOD,channel->getSockfd(),&efd);
+        std::cout << "update channel: " << strerror(errno) << std::endl;        
         assert(ret == 0);
-        // efd.data.ptr = channel;
-        if(channel->isNoneEvent())
-            efd.data.fd = -1;
+        // if(channel->isNoneEvent())
+        //     channelptr->setSockfd(-1);
     }
 }
 void Epoll::removeChannel(Channel * channel) {

@@ -30,6 +30,7 @@
 #include <fstream>
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
+using namespace::std::placeholders;
 // #include <unility>
 namespace DataStructure {
 
@@ -151,5 +152,8 @@ typedef struct _list {
   unsigned long len;
 } list_;
 }  // namespace clientStatus
+
+class Accept;
+typedef std::shared_ptr<Accept> AcceptorPtr;
 
 #endif

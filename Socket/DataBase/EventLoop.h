@@ -18,6 +18,8 @@ class EventLoop {
         void loop();
         void updateChannel(Channel * channel);
         void  quit() { quit_ = true; }
+        void runInLoop(const std::function<void()> &cb) {  cb(); }
+        void removeChannel(Channel* channel) { epoll_->removeChannel(channel); }
     private:
         bool looping_;
         ChannelList activeChannels_;

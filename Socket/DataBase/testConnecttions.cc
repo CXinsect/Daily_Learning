@@ -13,7 +13,7 @@ int main() {
     Address listenaddr (8888);
     EventLoop loop;
     Accept acceptor(&loop,listenaddr);
-    acceptor.setConnectionCallBack(connection);
+    acceptor.setNewConnectionCallBack(connection);
     acceptor.listen();
     loop.loop();
 }
