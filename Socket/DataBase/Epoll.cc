@@ -85,8 +85,7 @@ void Epoll::removeChannel(Channel * channel) {
         //Update the location of the current element
         channel_[channelEnd]->setIndex(index);
         events_.pop_back();
-        //Blessing is not a single disaster
-        int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_DEL,channel->getSockfd(),const_cast<struct epoll_event*>(&efd));
-        assert(ret == 0);
     }
+    int res = ::epoll_ctl(epollfd_,EPOLL_CTL_DEL,channel->getSockfd(),const_cast<struct epoll_event*>(&efd));
+    assert(res == 0);
 }

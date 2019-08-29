@@ -6,11 +6,12 @@
 
 void onConnection(const AcceptorPtr& conn) {
     std::cout << "New Connection: " << conn->getSocketInfo() << std::endl;
-    //  conn->send("hello,linux");
+    conn->send("hello,linux");
 }
 void onMessage(const AcceptorPtr& conn,Buffer *buf,ssize_t len) {
     std::cout << "Message: " << (int)len << std::endl;
-    conn->send("hello,linux");
+    std::string message = "hello,linux";
+    // conn->send(message);
 }
 int main (void) {
     Address listenaddr(8888);

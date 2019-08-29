@@ -33,7 +33,8 @@ void Accept::handleRead () {
     ssize_t n = input_.readFd(channelAccepted_->getSockfd());
     std::cout << "length: " << n << std::endl;
     if(n > 0) {
-        messagecallback_(shared_from_this(),&input_,-1);
+        // shared_from_this()->test();
+        messagecallback_(shared_from_this(),&input_,n);
     } else if(n == 0)
         handleClose();
     else {
@@ -53,7 +54,8 @@ void Accept::shutdownInLoop () {
     }
 }
 void Accept::send(const std::string &message) {
-    if(state_ == disConnected) {
+    // assert(state_ == Connected);
+    if(state_ == Connected) {
         sendInLoop(message);
     }
 }
@@ -108,6 +110,6 @@ void Accept::handleClose() {
     channelAccepted_->disableAll();
     connectioncallback_(shared_from_this());
     std::cout << "Get(): " << channelAccepted_.get()->getSockfd() << " : " << channelAccepted_->getSockfd() << std::endl;
-    if(channelAccepted_.get())
-        loop_->removeChannel(channelAccepted_.get());
+    loop_->removeChannel(channelAccepted_.get());
+    std::cout <<"Channel has been Closed" << std::endl;
 }

@@ -13,8 +13,8 @@ class Accept : public std::enable_shared_from_this<Accept>{
     public:
         typedef std::function<void(int sockfd,
                                        const Address &)> NewConnectionCallBack;
-        typedef std::function<void(const AcceptorPtr)> ConnecttionCallBack;
-        typedef std::function<void(const AcceptorPtr&conn,
+        typedef std::function<void(const AcceptorPtr&)> ConnecttionCallBack;
+        typedef std::function<void(const AcceptorPtr &conn,
                                         Buffer *buf,ssize_t len)> MessageCallBack;
        
         typedef std::function<void()> CloseCallBack;
@@ -24,9 +24,7 @@ class Accept : public std::enable_shared_from_this<Accept>{
         void NewConnection(int sockfd,const Address& peeraddr) {
             std::cout << peeraddr.toIp() << std::endl;
             addr_ = peeraddr;
-            setCloseCallBack(std::bind(&Accept::handleClose,this));
-            // channelAccepted_->setSockfd(sockfd);
-            // channelAccepted_->enableReading();
+            shared_from_this()->setCloseCallBack(std::bind(&Accept::handleClose,this));
             std::cout << "GetSockfd: " << sockfd << std::endl;
             setChannelAccepted(std::shared_ptr<Channel>(new Channel(loop_,sockfd)));
             
@@ -47,7 +45,16 @@ class Accept : public std::enable_shared_from_this<Accept>{
             channelAccepted_ = channelAcccepted;
             setState(Connected);
             channelAccepted_->setsReadCallback(std::bind(&Accept::handleRead,this));
-            channelAccepted_->enableReading(); 
+            channelAccepted_->setWriteCallback(std::bind(&Accept::handleWrite,this));
+            channelAccepted_->enableReading();
+            
+            // AcceptorPtr conn(new Accept(loop_,addr_));
+            // conn->channelAccepted_ = channelAcccepted;
+            // conn->channelAccepted_->setsReadCallback(std::bind(&Accept::handleRead,this));
+            // conn->setConnectionCallBack(connectioncallback_);
+            // conn->setMessageCallBack(messagecallback_);
+            // conn->setCloseCallBack(std::bind(&Accept::handleClose,this)); 
+            // conn->channelAccepted_->enableReading();
         }
         void removeChannel() { std::bind(&Accept::handleClose,this); }
         bool listening() { return listening_; }
