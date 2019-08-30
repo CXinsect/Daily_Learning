@@ -16,13 +16,15 @@ int Client::Connect() {
     serv.sin_family = AF_INET;
     serv.sin_port = htons(port_);
     serv.sin_addr.s_addr = ::inet_addr(Ip_.c_str());
-    int original = setNoOrBlocking(confd_);
-    confd_ = ::connect(sockfd,(struct sockaddr*)&serv,sizeof(serv));
-    if(confd_ < 0 && errno != EINPROGRESS) {
+    int original = setNoOrBlocking(sockfd);
+    int ret  = ::connect(sockfd,(struct sockaddr*)&serv,sizeof(serv));
+    std::cout << strerror(errno) << std::endl;
+    confd_ = sockfd;
+    if(ret < 0 && errno != EINPROGRESS) {
         ::close(confd_);
         return -1;
     }
-    else if(confd_ == 0) {
+    else if(ret == 0) {
         int res = ::fcntl(confd_,F_SETFL,original);
         assert(res != -1);
         return confd_;
@@ -32,8 +34,8 @@ int Client::Connect() {
     FD_ZERO(&wd);
     FD_SET(confd_,&wd);
     struct timeval tv;
-    tv.tv_sec = time_;
-    int ret = ::select(confd_+1,NULL,&wd,NULL,&tv);
+    tv.tv_sec = 1;
+    ret = ::select(confd_+1,NULL,&wd,NULL,&tv);
     if(ret <= 0) {
         std::cout << "Connect timeout" << std::endl;
         ::close(confd_);

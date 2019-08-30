@@ -56,14 +56,13 @@ class Accept : public std::enable_shared_from_this<Accept>{
         void removeChannel() { std::bind(&Accept::handleClose,this); }
         bool listening() { return listening_; }
         void listen();
-        // void send(const std::string &message);
+        void send(const std::string &message);
     private:
         enum State {Connecting, Connected, disConnected, disConnecting};
         void setNewConnectionCallBack(const NewConnectionCallBack &cb)
         { newconnectioncallback_ = cb;}
         void handleEstablishRead();
         void handleRead();
-        void send(const std::string &message);
         void sendInLoop(const std::string &messages);
         void shutdown();
         void shutdownInLoop();

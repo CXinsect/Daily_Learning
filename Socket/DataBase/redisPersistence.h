@@ -5,6 +5,7 @@
 
 class Persistence {
     public:
+        Persistence() {}
         Persistence(std::shared_ptr<DataBase>& ptr) : database_(ptr) { }
         static void parentHandle(int sig);
         void childHandle(int sig);

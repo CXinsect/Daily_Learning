@@ -17,8 +17,9 @@ class Client {
             char buf[1024] = {0};
             std::cout << "Input quit to Stop" << std::endl;
             while(fgets(buf,sizeof(buf),stdin) != NULL) {
-                if(!strcmp(buf,"quit"))
+                if(strcmp(buf,"quit") == 0)
                     break;
+                std::cout << "test" << std::endl;
                 sendRequest(buf);
                 std::cout << "Input quit to Stop" << std::endl;
             }
@@ -29,11 +30,12 @@ class Client {
         void AuxiliaryFun(char *buffer) {
             int ret = Io::writen(confd_,buffer,strlen(buffer));
             assert(ret == strlen(buffer));
-            memset(buffer,0,sizeof(*buffer));
-            ret = Io::readn(confd_,buffer,sizeof(buffer));
+            memset(buffer,0,1024);
+            setNoOrBlocking(confd_);
+            ret = Io::readn(confd_,buffer,1024);
             assert(ret != -1);
             std::cout << "Response: " << buffer << std::endl;
-            memset(buffer,0,sizeof(*buffer));
+            memset(buffer,0,1024);
         }
     private:
         int port_;
@@ -68,11 +70,12 @@ size_t Io::readn(int sockfd,void*buf,ssize_t count) {
   char *bufp = (char*)buf;
   int nread = 0;
   int nleft = count;
+  int old = 0;
   while(nleft > 0) {
     nread = read(sockfd,bufp,nleft);
     if(nread < 0) {
-      if(errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
-        continue;
+      if(errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) 
+        return old;
       return -1;
     }
     if(nread == 0) {
@@ -81,6 +84,7 @@ size_t Io::readn(int sockfd,void*buf,ssize_t count) {
     }
     bufp += nread;
     nleft -= nread;
+    old += nread;
   }
   return count - nleft;
 }
