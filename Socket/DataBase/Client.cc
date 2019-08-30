@@ -3,8 +3,8 @@
 int Client::setNoOrBlocking (int sockfd) {
     int ret = ::fcntl(sockfd,F_GETFL);
     assert(ret != -1);
-    int org = ret | O_NONBLOCK;
-    int res = ::fcntl(sockfd,F_SETFL,ret);
+    int flags = ret | O_NONBLOCK;
+    int res = ::fcntl(sockfd,F_SETFL,flags);
     assert(res != -1);
     return ret;
 }
@@ -14,7 +14,7 @@ int Client::Connect() {
     struct sockaddr_in serv;
     memset(&serv,0,sizeof(serv));
     serv.sin_family = AF_INET;
-    serv.sin_port = port_;
+    serv.sin_port = htons(port_);
     serv.sin_addr.s_addr = ::inet_addr(Ip_.c_str());
     int original = setNoOrBlocking(confd_);
     confd_ = ::connect(sockfd,(struct sockaddr*)&serv,sizeof(serv));
@@ -56,4 +56,100 @@ int Client::Connect() {
     ret = ::fcntl(confd_,F_SETFL,original);
     assert(ret != -1);
     return confd_;
+}
+void Client::sendRequest(const std::string &buf) {
+    std::istringstream str (buf);
+    std::string cmd,key,value;
+    char buffer[1024] = {0};
+    str >> cmd;
+    assert(cmd.c_str() != NULL);
+    if(cmd == "get") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        assert(confd_ != -1);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                         (int)key.size(),key.c_str());
+        AuxiliaryFun(buffer);
+    } else if(cmd == "set") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        str >> value;
+        assert(value.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                            (int)key.size(),key.c_str(),
+                                                            (int)value.size(),value.c_str());
+       AuxiliaryFun(buffer);
+    } else if(cmd == "bgsave") {
+        snprintf(buffer,sizeof(buffer),"!%d#%s\r\n",(int)cmd.size(),cmd.c_str());
+        AuxiliaryFun(buffer);
+
+    } else if(cmd == "del") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                          (int)key.size(),key.c_str());
+        AuxiliaryFun(buffer);
+
+    } else if(cmd == "select") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        str >> value;
+        assert(value.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                                (int)key.size(),key.c_str(),
+                                                                (int)value.size(),value.c_str());
+        AuxiliaryFun(buffer);
+    } else if(cmd == "expire") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        str >> value;
+        assert(value.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                                (int)key.size(),key.c_str(),
+                                                                (int)value.size(),value.c_str());
+       AuxiliaryFun(buffer);
+    } else if(cmd == "rpush") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        str >> value;
+        assert(value.c_str() != NULL);
+        int pos = buf.find(value);
+        assert(pos != -1);
+        int res = buf.find('\n',pos);
+        value = buf.substr(pos,res-pos);
+        std::cout << "Value: " << value << std::endl;
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                                (int)key.size(),key.c_str(),
+                                                                (int)value.size(),value.c_str());
+        AuxiliaryFun(buffer);
+    } else if(cmd == "rpop") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                          (int)key.size(),key.c_str());
+        AuxiliaryFun(buffer);
+    } else if(cmd == "hset") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        std::string skey;
+        str >> skey;
+        assert(skey.c_str() != NULL);
+        str >> value;
+        assert(value.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                          (int)key.size(),key.c_str(),
+                                                          (int)skey.size(),skey.c_str(),
+                                                          (int)value.size(),value.c_str());
+        AuxiliaryFun(buffer);
+
+    } else if(cmd == "hget") {
+        str >> key;
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                           (int)key.size(),key.c_str());
+        AuxiliaryFun(buffer);
+    }
+    else {
+        std::cout << "The command entered is incorrect, please re-enter" << std::endl;
+        return;
+    }
 }

@@ -29,45 +29,12 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
 using namespace::std::placeholders;
 // #include <unility>
 namespace DataStructure {
-
-typedef int (*FunctionCallBack)(struct _EventLoop &eventloop, int fd,
-                                std::string clientDate, int mask);
-
-// typedef int (*WriteCallBack) (struct _EventLoop &eventloop, int fd,
-// std::string clientDate, int mask);
-
-typedef struct _SocketEvents {
-  int mask;
-
-  FunctionCallBack readcallback_;
-
-  FunctionCallBack writecallback_;
-
-  std::string clientDate;
-
-} SocketEvents;
-
-typedef struct _FiredType {
-  int mask;
-  int fd;
-} FiredType;
-
-typedef struct _EventLoop {
-  int setsize;
-
-  std::shared_ptr<std::vector<SocketEvents>> events;
-
-  std::shared_ptr<std::vector<FiredType>> fired;
-
-  bool stoped;
-
-  std::string clientDate;
-} EventLoop;
 
 typedef struct _redisObject {
   unsigned type : 4;
@@ -76,18 +43,6 @@ typedef struct _redisObject {
 } redisObject;
 
 typedef std::function<void()> CommandCallBack;
-typedef struct _redisCommand {
-  std::string orderName;
-  CommandCallBack commandcallback_;
-  int arity;           //参数个数
-  std::string sflags;  //命令属性
-  int flags;           //二进制命令标识
-} redisCommand;
-
-// DataStructure::redisCommand cmdTable[]{{"get", getCommand, 2, "r", 0},
-//                                        {"set", setCommand, 3, "w", 0},
-//                                        {"del", delCommand, 2, "w", 0},
-//                                        {"bgsave", bgsaveCommand, 1, "a", 0}};
 
 //对象
 const int ObjString = 0;
@@ -113,48 +68,51 @@ const std::string SpareTire = "SPACE";
 
 }  // namespace DataStructure
 
-namespace RedisDataBase {
-typedef std::function<void(const void *key)> hashFunction;
+const int RedisMaster = 0;
+const int RedisSlave = 1;
+//客户端状态
+ typedef struct _clientState {
+   int cfd;
+   std::string name;
+   int flags_;
+   int db_index;
+   std::vector <std::string> argv;
+   int argc;
+   int authentication;
+ }clientState;
 
-/*实现哈希*/
-typedef struct _dictEntry {
-  void *key;
-  void *val;
-  struct _dictEntry *next;
-} dictEntry;
+typedef struct _cmdTable {
 
-typedef struct _dictht {
-  std::vector<dictEntry> table;
-
-  unsigned long size;
-
-  unsigned long sizemask;
-
-  unsigned long used;
-} dicht;
-
-typedef struct _dict {
-  hashFunction type;
-  std::string priData;
-  dicht ht[2];
-  long rehashindex;
-} dict;
-
-typedef struct _redisDb {
-  std::vector<dict> dictable;
-  std::vector<dict> expires;
-  int id;
-} redisDb;
-}  // namespace RedisDataBase
-namespace clientStatus {
-typedef struct _list {
-  std::list<void *> clientList;
-  std::function<int(void *ptr, void *key)> match;
-  unsigned long len;
-} list_;
-}  // namespace clientStatus
+  public:
+    // void setMember(const std::string&_name,
+    //            std::function<void(const std::string&,const std::string&,
+    //                              const std::string&,const std::string&)> _callback,
+    //              int _argc,int _sflags,int _flags,int _calls)
+    // {
+    //   name = _name;
+    //   callback = _callback;
+    //   argc = _argc;
+    //   sflags = _sflags;
+    //   flags = _flags;
+    //   calls = _calls;
+    // }
+    std::string name;
+    std::function<void(const std::string&,const std::string&,
+                          const std::string&,const std::string&,
+                          const std::string&,const std::string&)> callback;
+    int argc;
+    std::string  sflags;
+    int flags;
+    int calls;
+}cmdTable;
 
 class Accept;
 typedef std::shared_ptr<Accept> AcceptorPtr;
+
+class Io {
+  public:
+    static size_t writen(int sockfd,void*buf,ssize_t count);
+    static size_t readn(int sockfd,void*buf,ssize_t count);
+};
 
 #endif
