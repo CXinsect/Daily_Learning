@@ -65,34 +65,26 @@ size_t Io::writen(int sockfd,char*buf,ssize_t count) {
   }
   return count - nleft;
 }
-size_t Io::readn(int sockfd,char*buf,ssize_t count) {
+size_t Io::readn(int sockfd,char*buf,ssize_t size) {
   assert(sockfd != -1);
   assert(buf != NULL);
   assert(count != 0);
   char *bufp = buf;
-  int nread = 0;
-  int nleft = count;
-  int flags = 1;
-  int old = 0;
-  while(nleft > 0) {
-    nread = read(sockfd,bufp,nleft);
+  int count = 0;
+  while(1) {
+    nread = read(sockfd,bufp,size);
     if(nread < 0) {
-      if(errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
-        flags = 0;
-        continue;
+      if(errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN) {
+        break;
       }
       return -1;
     }
-    if(nread == 0) {
+    else if(read == 0) {
       std::cout << "Server is Over" << std::endl;
-      return nleft;
+      return count;
     }
-    bufp += nread;
-    nleft -= nread;
-    old += nread;
-    if(flags == 0 && old > 0)
-      return old;
+    count += nread;
   }
-  return count - nleft;
+  return count;
 }
 #endif
