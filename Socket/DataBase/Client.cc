@@ -18,7 +18,7 @@ int Client::Connect() {
     serv.sin_addr.s_addr = ::inet_addr(Ip_.c_str());
     int original = setNoOrBlocking(sockfd);
     int ret  = ::connect(sockfd,(struct sockaddr*)&serv,sizeof(serv));
-    std::cout << strerror(errno) << std::endl;
+    // std::cout << strerror(errno) << std::endl;
     confd_ = sockfd;
     if(ret < 0 && errno != EINPROGRESS) {
         ::close(confd_);
@@ -59,7 +59,7 @@ int Client::Connect() {
     assert(ret != -1);
     return confd_;
 }
-void Client::sendRequest(const std::string &buf) {
+void Client::sendRequest( const std::string &buf ) {
     std::istringstream str (buf);
     std::string cmd,key,value;
     char buffer[1024] = {0};
@@ -70,7 +70,7 @@ void Client::sendRequest(const std::string &buf) {
         assert(key.c_str() != NULL);
         assert(confd_ != -1);
         snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
-                                                         (int)key.size(),key.c_str());
+                                                       (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "set") {
         str >> key;

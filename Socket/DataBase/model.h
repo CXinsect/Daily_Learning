@@ -111,8 +111,8 @@ typedef std::shared_ptr<Accept> AcceptorPtr;
 
 class Io {
   public:
-    static size_t writen(int sockfd,void*buf,ssize_t count);
-    static size_t readn(int sockfd,void*buf,ssize_t count);
+    static size_t writen(int sockfd,char*buf,ssize_t count);
+    static size_t readn(int sockfd,char*buf,ssize_t count);
 };
 
 #endif
