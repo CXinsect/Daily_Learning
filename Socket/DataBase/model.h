@@ -70,6 +70,7 @@ const std::string SpareTire = "SPACE";
 
 const int RedisMaster = 0;
 const int RedisSlave = 1;
+const long long DefaultTime = 2038;
 //客户端状态
  typedef struct _clientState {
    int cfd;
@@ -97,7 +98,7 @@ typedef struct _cmdTable {
     //   calls = _calls;
     // }
     std::string name;
-    std::function<void(const std::string&,const std::string&,
+    std::function<const std::string (const std::string&,const std::string&,
                           const std::string&,const std::string&,
                           const std::string&,const std::string&)> callback;
     int argc;

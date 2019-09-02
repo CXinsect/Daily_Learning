@@ -51,7 +51,7 @@ DataBase::FindList(const std::string &key) {
   }
   return (*ptr);
 }
-void DataBase::addKeySpace(int type, int encoding, const std::string &key,
+bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
                            const std::string &value, const std::string &value1,
                            long long expiresTime) {
   type_ = type;
@@ -59,14 +59,15 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
   key_ = key;
   value_ = value;
   value1_ = value1;
-  setKeySpaceExpiresTime(expiresTime);
   if (type_ == DataStructure::ObjString) {
     std::map<std::pair<std::string, long long>, std::string>::iterator it =
         FindString(key);
     if (it == String_.end())
       String_.insert(make_pair(make_pair(key, expiresTime_), value_));
     else {
-      it->second = value;
+        String_.erase(it);
+        String_.insert(make_pair(make_pair(key_,expiresTime+getTimestamp()),value_));
+      // setKeySpaceExpiresTime(getTimestamp());
     }
   } else if (type == DataStructure::ObjHash) {
     std::map<std::pair<std::string, long long>,
@@ -77,7 +78,10 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
       tmp.insert(make_pair(value_, value1_));
       Hash_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
-      it->second.insert(make_pair(value_, value1_));
+      Hash_.erase(it);
+      std::multimap<std::string, std::string> tmp;
+      tmp.insert(make_pair(value_, value1_));
+      Hash_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
       // std::map<std::string, std::string>::iterator iter = it->second.begin();
       // while (iter != it->second.end()) {
       //   if (iter->first == key)
@@ -99,8 +103,10 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
       List_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
       //更新list的值
-      it->second.push_back(value_);
-
+      List_.erase(it);
+      std::list<std::string> tmp;
+      tmp.push_back(value_);
+      List_.insert(make_pair(make_pair(key_, expiresTime+getTimestamp()), tmp));
       // std::list<std::string>::iterator iter = it->second.begin();
       // while(size-- > 0)
       //     iter++;
@@ -108,9 +114,11 @@ void DataBase::addKeySpace(int type, int encoding, const std::string &key,
     }
   } else {
     std::cout << "Unknown type" << std::endl;
-    abort();
+    return false;
+    // abort();
   }
   std::cout << "addKeySpace has been Executed" << std::endl;
+  return true;
 }
 void DataBase::delKeySpace(int type, const std::string &key) {
   if (type == DataStructure::ObjString) {
@@ -300,7 +308,10 @@ void DataBase::rdbLoad() {
   path += "/1.rdb";
   struct stat stat_;
   int ret = ::stat(path.c_str(), &stat_);
-  assert(ret != -1);
+  if(ret < 0) {
+    std::cout << "Rdb file does not exist" << std::endl;
+    return;
+  }
   std::ifstream in;
   in.open(path, std::ios::in);
   // if opening is successful

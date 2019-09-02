@@ -3,7 +3,7 @@
 class DataBase {
  public:
   DataBase(){};
-  DataBase(int db_num) : db_num_(db_num) {}
+  DataBase(int db_num) : db_num_(db_num) { }
 
  public:
   typedef std::map<std::pair<std::string, long long>, std::string> String;
@@ -14,14 +14,16 @@ class DataBase {
       List;
   const long long DefaultTime = -2038;
   void rdbLoad();
-  void addKeySpace(int type, int encoding, const std::string &key,
+  bool addKeySpace(int type, int encoding, const std::string &key,
                    const std::string &value, const std::string &value1,
                    long long expiresTime);
   void delKeySpace(int type, const std::string &key);
   std::string getKeySpace(int type, const std::string &key);
-  void setKeySpaceExpiresTime(long long expiresTime) {
-    if (expiresTime != DefaultTime) expiresTime_ = expiresTime + getTimestamp();
-  };
+  // void setKeySpaceStringExpiresTime(const String::iterator &it,long long expiresTime) {
+  //   if (expiresTime != DefaultTime)  {
+  //     tmp = expiresTime + getTimestamp();
+  //   }
+  // };
   long long getKeySpaceExpiresTime(int type, const std::string &key);
   bool judgeKeySpaceExpiresTime(int type, const std::string &key);
   void deleteKeySpaceExpireTime(int type, const std::string &key);
@@ -31,6 +33,9 @@ class DataBase {
   String &getKeySpaceStringObject() { return String_; }
   Hash &getKeySpaceHashObject() { return Hash_; }
   List &getKeySpaceListObject() { return List_; }
+  int getKeySpaceStringSize() { return String_.size(); }
+  int getKeySpaceHashSize() { return Hash_.size(); }
+  int getKeySpaceListSize() { return List_.size(); }
 
  private:
   long long getTimestamp() {

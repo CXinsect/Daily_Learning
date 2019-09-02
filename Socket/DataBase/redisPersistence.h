@@ -11,6 +11,9 @@ class Persistence {
         void childHandle(int sig);
         void rdbSave();
         void CheckStorageConditions();
+        void setDataBase(DataBase &database) {
+
+        }
     private:
          long long  getTimestamp() {
             struct timeval tv;

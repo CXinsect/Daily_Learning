@@ -19,8 +19,8 @@ class Server {
             Init();
         }
     private:
-        void getCommand(const std::string&);
-        void setCommand(const std::string&,const std::string&,const std::string&);
+        const std::string getCommand(const std::string&);
+        const std::string setCommand(const std::string&,const std::string&);
         void bgsaveCommand(const std::string&);
         void delCommand(const std::string&,const std::string&);
         void selectCommand(const std::string&,const std::string&);
@@ -29,10 +29,22 @@ class Server {
         void rpopCommand(const std::string&,const std::string&);
         void hsetCommand(const std::string&,const std::string&,const std::string&,const std::string&);
         void hgetCommand(const std::string&,const std::string&);
+        static void endDataBase(DataBase *) { ; }
     public:
         void Init() {
+            DataBase database;
+            //Load local file
+            database.rdbLoad();
+            std::cout << "size: " << database.getKeySpaceStringSize() << std::endl;
+            database_.push_back(database);
+            //update database index
+            db_index_ = database_.size()-1;
+            std::shared_ptr <DataBase> tmp(&database,endDataBase);
+            std::weak_ptr<Persistence> pbase(std::shared_ptr<Persistence>(new Persistence (tmp)));
+            persistence_ = pbase;
+            //init command table
             cmdtable_.push_back({"get",std::bind(&Server::getCommand,this,_1),2,"rF",0});
-            // cmdtable_.push_back({"set",std::bind(&Server::setCommand,this,_1,_2,_3),4,"wm",0});
+            cmdtable_.push_back({"set",std::bind(&Server::setCommand,this,_1,_2),4,"wm",0});
             // cmdtable_.push_back({"bgsave",std::bind(&Server::bgsaveCommand,this,_1),2,"as",0});
             // cmdtable_.push_back({"del",std::bind(&Server::delCommand,this,_1,_2),3,"w",0});
             // cmdtable_.push_back({"select",std::bind(&Server::selectCommand,this,_1,_2),3,"lF",0});
@@ -52,10 +64,10 @@ class Server {
         std::shared_ptr<Accept> accept_;
         std::vector <clientState> client_;
         std::vector<cmdTable> cmdtable_;
-        int db_index_ = 0;
+        int db_index_ = -1;
         int max_index_ = 16;
         std::vector <DataBase> database_;
-        std::shared_ptr<Persistence> persistence_;
+        std::weak_ptr<Persistence> persistence_;
         //temporary structure
         int keylen_;
         int skeylen_;

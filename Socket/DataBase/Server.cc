@@ -4,13 +4,32 @@ void Server::onConnection(const AcceptorPtr &conn) {
     std::cout << "New Connection" << std::endl;
 }
 void Server::onMessage(const AcceptorPtr &conn,Buffer *buf,ssize_t len) {
-    std::string test = commandRequest(buf);
-    std::cout << "test: " << test << std::endl;
-    conn->send(test);
+    std::string res = commandRequest(buf);
+    std::cout << "Response has been sent: " << res << std::endl;
+    conn->send(res);
 }
-void Server::getCommand (const std::string &ptr) {
+const std::string  Server::getCommand (const std::string &ptr) {
 
     std::cout << "getCommand: " << ptr <<  std::endl;
+    std::string res = database_[db_index_].getKeySpace(DataStructure::ObjString,key_);
+    if(res.c_str() == NULL)
+        return "Empty Reply";
+    else 
+        return res;
+}
+const std::string Server::setCommand (const std::string &key,const std::string &value) {
+    bool flags = database_[db_index_].addKeySpace(DataStructure::ObjString,
+                                                       DataStructure::EncodingRaw,
+                                                        key,value,
+                                                        DataStructure::SpareTire,
+                                                        DefaultTime);
+    std::cout << "size: " << database_[db_index_].getKeySpaceStringSize() << std::endl;
+    
+    if(!flags) {
+        return "set error";
+    } else {
+        return "ok";
+    }
 }
 std::string Server::commandRequest(Buffer *buf) {
     std::string res = std::string();
@@ -31,13 +50,28 @@ std::string Server::commandRequest(Buffer *buf) {
         else {
             pos = org.find('!',ret);
             ret = org.find('@',pos);
-            keylen_ = atoi(org.substr(pos+1,ret).c_str());
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
             key_ = org.substr(ret+1,keylen_);
-            it->callback(key_,"","","","","");
-            return "ok";
+            // std::string t = key_;
+            res = it->callback(key_,"","","","","");
         }
 
     } else if (cmd_ == "set") {
+        std::vector <cmdTable>::iterator it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end())
+            res = "Not Found This Command";
+        else {
+            pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            key_ = org.substr(ret+1,keylen_);
+            pos = org.find('!',ret);
+            ret = org.find('$',pos);
+            valuelen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            value_ = org.substr(ret+1,valuelen_);
+            res = it->callback(key_,value_,"","","","");
+        }
 
     } else if (cmd_ == "bgsave") {
 
