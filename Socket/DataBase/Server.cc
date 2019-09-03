@@ -31,6 +31,40 @@ const std::string Server::setCommand (const std::string &key,const std::string &
         return "ok";
     }
 }
+const std::string Server::bgsaveCommand(){
+    std::shared_ptr <Persistence> p = persistence_.lock();
+    if(p) {
+        bool flags = p->CheckStorageConditions();
+        if(flags)
+            return "ok";
+    } else {
+         std::cout << "This Line" << std::endl;
+         std::shared_ptr<DataBase> tmp (&database_[db_index_],endDataBase);
+         p.reset(new Persistence(tmp));
+         bool flags = p->CheckStorageConditions();
+         if(flags)
+            return "ok";
+         else
+            return "persistence error";
+    }
+    return "persistence error";
+}
+const std::string Server::delCommand(const std::string &key) {
+    bool flags = database_[db_index_].delKeySpace(DataStructure::ObjString,key);
+    if(flags) return "ok";
+    else return "del error";
+}
+const std::string Server::selectCommand(const std::string &index_) {
+    int index = atoi(index_.c_str());
+    DataBase database;
+    database_.push_back(database);
+    db_len_ = database_.size();
+    db_index_ = index - 1;
+    std::shared_ptr<DataBase> tmp(&database_[db_index_],endDataBase);
+    std::weak_ptr<Persistence> pbase(std::shared_ptr<Persistence>(new Persistence (tmp)));
+    persistence_ = pbase;
+    return "ok";
+}
 std::string Server::commandRequest(Buffer *buf) {
     std::string res = std::string();
     std::string org = buf->retrieveAllAsString();
@@ -74,11 +108,35 @@ std::string Server::commandRequest(Buffer *buf) {
         }
 
     } else if (cmd_ == "bgsave") {
+        std::vector <cmdTable>::iterator it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) 
+            res = "Not Found This Command";
+        else 
+            res = it->callback("","","","","","");
 
     } else if (cmd_ == "del") {
-
+        std::vector <cmdTable>:: iterator it = cmdtable_.begin();
+        while (it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) res = "Not Found This Command";
+        else {
+            pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            key_ = org.substr(ret+1,keylen_);
+            res = it->callback(key_,"","","","","");
+        }
     } else if (cmd_ == "select") {
-
+        std::vector<cmdTable>::iterator it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) res = "Not Found This Command";
+        else {
+            pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            key_ = org.substr(ret+1,keylen_);
+            res = it->callback(key_,"","","","","");
+        }
     } else if (cmd_ == "expire") {
 
     } else if (cmd_ == "rpush") {

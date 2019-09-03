@@ -120,7 +120,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
   std::cout << "addKeySpace has been Executed" << std::endl;
   return true;
 }
-void DataBase::delKeySpace(int type, const std::string &key) {
+bool DataBase::delKeySpace(int type, const std::string &key) {
   if (type == DataStructure::ObjString) {
     std::map<std::pair<std::string, long long>, std::string>::iterator it =
         String_.begin();
@@ -134,6 +134,7 @@ void DataBase::delKeySpace(int type, const std::string &key) {
       std::cout << "Not Found" << std::endl;
     else {
       String_.erase(it);
+      return true;
     }
   } else if (type == DataStructure::ObjHash) {
     std::map<std::pair<std::string, long long>,
@@ -151,6 +152,7 @@ void DataBase::delKeySpace(int type, const std::string &key) {
       abort();
     } else {
       Hash_.erase(it);
+      return true;
     }
   } else if (type == DataStructure::ObjList) {
     std::map<std::pair<std::string, long long>,
@@ -165,12 +167,15 @@ void DataBase::delKeySpace(int type, const std::string &key) {
     if (it == List_.end()) {
       std::cout << "Not Found" << std::endl;
       abort();
-    } else
+    } else {
       List_.erase(it);
+      return true;
+    }
   } else {
     std::cout << "Unknown type" << std::endl;
     abort();
   }
+  return false;
 }
 std::string DataBase::getKeySpace(int type, const std::string &key) {
   std::string ret = std::string();

@@ -17,7 +17,7 @@ class DataBase {
   bool addKeySpace(int type, int encoding, const std::string &key,
                    const std::string &value, const std::string &value1,
                    long long expiresTime);
-  void delKeySpace(int type, const std::string &key);
+  bool delKeySpace(int type, const std::string &key);
   std::string getKeySpace(int type, const std::string &key);
   // void setKeySpaceStringExpiresTime(const String::iterator &it,long long expiresTime) {
   //   if (expiresTime != DefaultTime)  {

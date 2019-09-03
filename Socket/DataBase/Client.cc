@@ -97,9 +97,8 @@ void Client::sendRequest( const std::string &buf ) {
         assert(key.c_str() != NULL);
         str >> value;
         assert(value.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
-                                                                (int)key.size(),key.c_str(),
-                                                                (int)value.size(),value.c_str());
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                                (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "expire") {
         str >> key;

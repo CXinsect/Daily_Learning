@@ -16,13 +16,32 @@ class Client {
         void getInput() {
             char buf[1024] = {0};
             std::cout << "Input quit to Stop" << std::endl;
+            int position = 0;
+            if(position == 0)
+              std::cout << "Redis >" << " ";
+            else
+              printf("Redis[%d] >",position);
             while(fgets(buf,sizeof(buf),stdin) != NULL) {
-                if(strcmp(buf,"quit") == 0)
+                std::string temp(buf,buf+strlen(buf));
+                int pos = temp.find_last_of('\n');
+                temp = temp.substr(0,pos);
+                if(!strcmp(temp.c_str(),"quit"))
                     break;
                 std::cout << "test" << std::endl;
                 const std::string tmp = buf;
                 sendRequest(tmp);
                 std::cout << "Input quit to Stop" << std::endl;
+                std::istringstream str(tmp);
+                std::string tselect;
+                str >> tselect;
+                if(tselect == "select") {
+                  pos = tmp.find_first_of(' ');
+                  position = atoi(tmp.substr(pos+1,tmp.size()).c_str());
+                }
+                 if(position == 0)
+                  std::cout << "Redis >" << " ";
+                else
+                  printf("Redis[%d] >",position); 
             }
         }
         void sendRequest(const std::string &buf);

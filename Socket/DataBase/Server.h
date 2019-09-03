@@ -21,14 +21,14 @@ class Server {
     private:
         const std::string getCommand(const std::string&);
         const std::string setCommand(const std::string&,const std::string&);
-        void bgsaveCommand(const std::string&);
-        void delCommand(const std::string&,const std::string&);
-        void selectCommand(const std::string&,const std::string&);
-        void expireTimeCommand(const std::string&,const std::string&,const std::string&);
-        void rpushCommand(const std::string&,const std::string&,const std::string&);
-        void rpopCommand(const std::string&,const std::string&);
-        void hsetCommand(const std::string&,const std::string&,const std::string&,const std::string&);
-        void hgetCommand(const std::string&,const std::string&);
+        const std::string bgsaveCommand();
+        const std::string delCommand(const std::string&);
+        const std::string selectCommand(const std::string&);
+        const std::string expireTimeCommand(const std::string&,const std::string&,const std::string&);
+        const std::string rpushCommand(const std::string&,const std::string&,const std::string&);
+        const std::string rpopCommand(const std::string&,const std::string&);
+        const std::string hsetCommand(const std::string&,const std::string&,const std::string&,const std::string&);
+        const std::string hgetCommand(const std::string&,const std::string&);
         static void endDataBase(DataBase *) { ; }
     public:
         void Init() {
@@ -38,6 +38,7 @@ class Server {
             std::cout << "size: " << database.getKeySpaceStringSize() << std::endl;
             database_.push_back(database);
             //update database index
+            db_len_ = database_.size();
             db_index_ = database_.size()-1;
             std::shared_ptr <DataBase> tmp(&database,endDataBase);
             std::weak_ptr<Persistence> pbase(std::shared_ptr<Persistence>(new Persistence (tmp)));
@@ -45,9 +46,9 @@ class Server {
             //init command table
             cmdtable_.push_back({"get",std::bind(&Server::getCommand,this,_1),2,"rF",0});
             cmdtable_.push_back({"set",std::bind(&Server::setCommand,this,_1,_2),4,"wm",0});
-            // cmdtable_.push_back({"bgsave",std::bind(&Server::bgsaveCommand,this,_1),2,"as",0});
-            // cmdtable_.push_back({"del",std::bind(&Server::delCommand,this,_1,_2),3,"w",0});
-            // cmdtable_.push_back({"select",std::bind(&Server::selectCommand,this,_1,_2),3,"lF",0});
+            cmdtable_.push_back({"bgsave",std::bind(&Server::bgsaveCommand,this),1,"as",0});
+            cmdtable_.push_back({"del",std::bind(&Server::delCommand,this,_1),2,"w",0});
+            cmdtable_.push_back({"select",std::bind(&Server::selectCommand,this,_1),3,"lF",0});
             // cmdtable_.push_back({"expire",std::bind(&Server::expireTimeCommand,this,_1,_2,_3),4,"wF",0});
             // cmdtable_.push_back({"rpush",std::bind(&Server::rpushCommand,this,_1,_2,_3),4,"wm",0});
             // cmdtable_.push_back({"rpop",std::bind(&Server::rpopCommand,this,_1,_2),3,"wm",0});
@@ -65,6 +66,7 @@ class Server {
         std::vector <clientState> client_;
         std::vector<cmdTable> cmdtable_;
         int db_index_ = -1;
+        int db_len_;
         int max_index_ = 16;
         std::vector <DataBase> database_;
         std::weak_ptr<Persistence> persistence_;

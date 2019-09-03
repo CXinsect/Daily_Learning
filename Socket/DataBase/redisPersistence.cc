@@ -2,13 +2,15 @@
 void Persistence::parentHandle(int sig) {
 std::cout << "parent process" << std::endl;
 }
-void Persistence::CheckStorageConditions() {
+bool Persistence::CheckStorageConditions() {
     long save_interval = getTimestamp() - lastsave_;
     if(save_interval > DataStructure::saveTime) {
         rdbSave();
         //update saved time
         lastsave_ = getTimestamp();
+        return true;
     }
+    return false;
 }
 void Persistence::rdbSave () {
     struct sigaction act , act1;

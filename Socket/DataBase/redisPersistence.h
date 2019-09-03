@@ -10,7 +10,7 @@ class Persistence {
         static void parentHandle(int sig);
         void childHandle(int sig);
         void rdbSave();
-        void CheckStorageConditions();
+        bool CheckStorageConditions();
         void setDataBase(DataBase &database) {
 
         }
