@@ -78,9 +78,17 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       tmp.insert(make_pair(value_, value1_));
       Hash_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
-      Hash_.erase(it);
       std::multimap<std::string, std::string> tmp;
-      tmp.insert(make_pair(value_, value1_));
+      std::multimap <std::string,std::string>::iterator iter = it->second.begin();
+      std::cout << iter->first << " " << iter->second << std::endl;
+      while(iter != it->second.end()) {
+        tmp.insert(make_pair(iter->first,iter->second));
+        iter++;
+      }
+      tmp.insert(make_pair(value,value1));
+
+      Hash_.erase(it);
+      std::cout << "getkeyspace size: " << tmp.size() << std::endl;
       Hash_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
       // std::map<std::string, std::string>::iterator iter = it->second.begin();
       // while (iter != it->second.end()) {
@@ -209,18 +217,23 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         ret = "Not Found";
       } else {
         std::multimap<std::string, std::string> tmp = it->second;
+        std::cout << "size: --" << tmp.size() << std::endl;
         char buf[1024] = {0};
+        char * pbuf = buf;
         int len = 0;
         std::multimap<std::string, std::string>::iterator iter = it->second.begin();
         while(iter != it->second.end()) {
-          auto pos = tmp.equal_range(iter->first);
-          int n = snprintf(buf,sizeof(buf),"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
-          assert(n >= 0);
+          std::cout << "multimap" << iter->first << std::endl;
+          // auto pos = tmp.equal_range(iter->first);
+          // int n = snprintf(pbuf,sizeof(buf)-len,"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
+          // assert(n >= 0);
+          // len += n;
+          // while(++pos.first != pos.second) {
+          //   n = snprintf(pbuf+len,sizeof(buf)-len,"%s ",pos.first->first.c_str());
+          //   len += n;
+          // }
+          int n = snprintf(pbuf+len,sizeof(buf)-len,"%s %s ",iter->first.c_str(),iter->second.c_str());
           len += n;
-          while(++pos.first != pos.second) {
-            n = snprintf(buf+len,sizeof(buf),"%s ",pos.first->first.c_str());
-            len += n;
-          }
           iter++;
         }
         
