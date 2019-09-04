@@ -211,11 +211,19 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         std::multimap<std::string, std::string> tmp = it->second;
         char buf[1024] = {0};
         int len = 0;
-        for(auto pos = tmp.equal_range(key); pos.first != pos.second; pos.first++) {
-          int n = snprintf(buf+len,sizeof(buf),"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
+        std::multimap<std::string, std::string>::iterator iter = it->second.begin();
+        while(iter != it->second.end()) {
+          auto pos = tmp.equal_range(iter->first);
+          int n = snprintf(buf,sizeof(buf),"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
           assert(n >= 0);
           len += n;
+          while(++pos.first != pos.second) {
+            n = snprintf(buf+len,sizeof(buf),"%s ",pos.first->first.c_str());
+            len += n;
+          }
+          iter++;
         }
+        
         ret = buf;
         // for(auto pos = iter->equa)
         // ret = iter->second;

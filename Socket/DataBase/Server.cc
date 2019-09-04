@@ -78,16 +78,20 @@ const std::string Server::expireTimeCommand(const std::string &key,const std::st
     if(flags) return "ok";
     else return "expire error";
 }
-const std::string Server::rpushCommand(const std::string &key, const std::string &value) {
+const std::string Server::rpushCommand(const std::string &key, const std::string &value,const std::string &value1) {
     assert(db_index_ >= 0);
     bool flags = database_[db_index_].addKeySpace(DataStructure::ObjHash,
                                                        DataStructure::EncodingRaw,
-                                                        key,value,
-                                                        DataStructure::SpareTire,
+                                                        key,value,value1,
                                                         DefaultTime);
     if(flags) return "ok";
     else return "rpush error";
 
+}
+const std::string Server::hgetallCommand (const std::string &key) {
+    assert(db_index_ >= 0);
+    std::string tmp = database_[db_index_].getKeySpace(DataStructure::ObjHash,key);
+    return tmp;
 }
 std::string Server::commandRequest(Buffer *buf) {
     std::string res = std::string();
@@ -182,16 +186,30 @@ std::string Server::commandRequest(Buffer *buf) {
         if(it == cmdtable_.end()) res = "Not Found This Command";
         else {
             pos = org.find('!',ret);
-            ret = org.find('@',pos);
+            ret = org.find('#',pos);
             keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
             key_ = org.substr(ret+1,keylen_);
             pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            skeylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            skey_ = org.substr(ret+1,skeylen_);
+            pos = org.find('!',ret);
             ret = org.find('$',pos);
             valuelen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
-            value_ = org.substr(ret+1,valuelen_);
-            res = it->callback(key_,value_,"","","","");
+            value_ = org.substr(ret+1,skeylen_);
+            res = it->callback(key_,skey_,value_,"","","");
         }
-
+    } else if(cmd_ == "hgetall") {
+        std::vector <cmdTable>::iterator it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) res = "Not Found This Command";
+        else {
+            pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            key_ = org.substr(ret+1,keylen_);
+            res = it->callback(key_,"","","","","");
+        }
     } else if (cmd_ == "rpop") {
 
     } else if (cmd_ == "hset") {

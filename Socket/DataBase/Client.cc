@@ -112,15 +112,17 @@ void Client::sendRequest( const std::string &buf ) {
     } else if(cmd == "rpush") {
         str >> key;
         assert(key.c_str() != NULL);
+        std::string key1;
+        str >> key1;
         str >> value;
-        assert(value.c_str() != NULL);
-        int pos = buf.find(key);
-        assert(pos != -1);
-        int res = buf.find_last_of('\n');
-        value = buf.substr(pos+key.size()+1,res-(key.size()+pos+1));
+        // int pos = buf.find(key1);
+        // assert(pos != -1);
+        // int res = buf.find_last_of('\n');
+        // value = buf.substr(pos+key.size()+1,res-(key1.size()+pos+1));
         std::cout << "Value: " << value << std::endl;
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                                 (int)key.size(),key.c_str(),
+                                                                (int)key1.size(),key1.c_str(),
                                                                 (int)value.size()-1,value.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "rpop") {
@@ -147,6 +149,12 @@ void Client::sendRequest( const std::string &buf ) {
         str >> key;
         snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                            (int)key.size(),key.c_str());
+        AuxiliaryFun(buffer);
+    } else if (cmd == "hgetall") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                            (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
     }
     else {
