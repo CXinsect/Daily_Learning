@@ -105,7 +105,7 @@ void Client::sendRequest( const std::string &buf ) {
         assert(key.c_str() != NULL);
         str >> value;
         assert(value.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                                 (int)key.size(),key.c_str(),
                                                                 (int)value.size(),value.c_str());
        AuxiliaryFun(buffer);
@@ -114,14 +114,14 @@ void Client::sendRequest( const std::string &buf ) {
         assert(key.c_str() != NULL);
         str >> value;
         assert(value.c_str() != NULL);
-        int pos = buf.find(value);
+        int pos = buf.find(key);
         assert(pos != -1);
-        int res = buf.find('\n',pos);
-        value = buf.substr(pos,res-pos);
+        int res = buf.find_last_of('\n');
+        value = buf.substr(pos+key.size()+1,res-(key.size()+pos+1));
         std::cout << "Value: " << value << std::endl;
         snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                                 (int)key.size(),key.c_str(),
-                                                                (int)value.size(),value.c_str());
+                                                                (int)value.size()-1,value.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "rpop") {
         str >> key;

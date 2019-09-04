@@ -32,9 +32,6 @@ void Persistence::rdbSave () {
             assert(ret == 0);
             sigStop_ = true;
         }while(!sigStop_);
-        //wait for child process
-        int ret = waitpid(-1,NULL,WNOHANG);
-        assert(ret != -1);
             
     } else if(pid == 0) {
         if(!database_->getKeySpaceStringObject().size() &&
@@ -118,4 +115,7 @@ void Persistence::rdbSave () {
         //Signal the parent process
          kill(getppid(),SIGUSR1);
     }
+    //wait for child process
+        int ret = waitpid(-1,NULL,WNOHANG);
+        assert(ret != -1);
 }

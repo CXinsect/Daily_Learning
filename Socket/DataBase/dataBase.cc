@@ -208,9 +208,17 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         std::cout << "Not Found" << std::endl;
         ret = "Not Found";
       } else {
-        std::map<std::string, std::string>::iterator iter =
-            it->second.find(key);
-        ret = iter->second;
+        std::multimap<std::string, std::string> tmp = it->second;
+        char buf[1024] = {0};
+        int len = 0;
+        for(auto pos = tmp.equal_range(key); pos.first != pos.second; pos.first++) {
+          int n = snprintf(buf+len,sizeof(buf),"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
+          assert(n >= 0);
+          len += n;
+        }
+        ret = buf;
+        // for(auto pos = iter->equa)
+        // ret = iter->second;
       }
     } else if (type == DataStructure::ObjList) {
       std::map<std::pair<std::string, long long>,

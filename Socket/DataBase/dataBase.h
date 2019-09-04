@@ -24,6 +24,7 @@ class DataBase {
   //     tmp = expiresTime + getTimestamp();
   //   }
   // };
+  // bool setKeySpaceTime(int type, long long expireTime);
   long long getKeySpaceExpiresTime(int type, const std::string &key);
   bool judgeKeySpaceExpiresTime(int type, const std::string &key);
   void deleteKeySpaceExpireTime(int type, const std::string &key);

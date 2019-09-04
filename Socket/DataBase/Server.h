@@ -24,8 +24,8 @@ class Server {
         const std::string bgsaveCommand();
         const std::string delCommand(const std::string&);
         const std::string selectCommand(const std::string&);
-        const std::string expireTimeCommand(const std::string&,const std::string&,const std::string&);
-        const std::string rpushCommand(const std::string&,const std::string&,const std::string&);
+        const std::string expireTimeCommand(const std::string&,const std::string&);
+        const std::string rpushCommand(const std::string&, const std::string&);
         const std::string rpopCommand(const std::string&,const std::string&);
         const std::string hsetCommand(const std::string&,const std::string&,const std::string&,const std::string&);
         const std::string hgetCommand(const std::string&,const std::string&);
@@ -49,8 +49,8 @@ class Server {
             cmdtable_.push_back({"bgsave",std::bind(&Server::bgsaveCommand,this),1,"as",0});
             cmdtable_.push_back({"del",std::bind(&Server::delCommand,this,_1),2,"w",0});
             cmdtable_.push_back({"select",std::bind(&Server::selectCommand,this,_1),3,"lF",0});
-            // cmdtable_.push_back({"expire",std::bind(&Server::expireTimeCommand,this,_1,_2,_3),4,"wF",0});
-            // cmdtable_.push_back({"rpush",std::bind(&Server::rpushCommand,this,_1,_2,_3),4,"wm",0});
+            cmdtable_.push_back({"expire",std::bind(&Server::expireTimeCommand,this,_1,_2),3,"wF",0});
+            cmdtable_.push_back({"rpush",std::bind(&Server::rpushCommand,this,_1,_2),3,"wm",0});
             // cmdtable_.push_back({"rpop",std::bind(&Server::rpopCommand,this,_1,_2),3,"wm",0});
             // cmdtable_.push_back({"hset",std::bind(&Server::hsetCommand,this,_1,_2,_3,_4),5,"wm",0});
             // cmdtable_.push_back({"hget",std::bind(&Server::hgetCommand,this,_1,_2),3,"wm",0});
