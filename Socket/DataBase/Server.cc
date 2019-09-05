@@ -78,8 +78,9 @@ const std::string Server::expireTimeCommand(const std::string &key,const std::st
     if(flags) return "ok";
     else return "expire error";
 }
-const std::string Server::rpushCommand(const std::string &key, const std::string &value,const std::string &value1) {
+const std::string Server::hsetCommand(const std::string &key, const std::string &value,const std::string &value1) {
     assert(db_index_ >= 0);
+    std::cout << "ddddd" << key << value << value1 << std::endl;
     bool flags = database_[db_index_].addKeySpace(DataStructure::ObjHash,
                                                        DataStructure::EncodingRaw,
                                                         key,value,value1,
@@ -180,7 +181,7 @@ std::string Server::commandRequest(Buffer *buf) {
            value_ = org.substr(ret+1,valuelen_);
            res = it->callback(key_,value_,"","","","");
         }
-    } else if (cmd_ == "rpush") {
+    } else if (cmd_ == "hset") {
         std::vector<cmdTable>::iterator it = cmdtable_.begin();
         while(it != cmdtable_.end() && it->name != cmd_) it++;
         if(it == cmdtable_.end()) res = "Not Found This Command";
@@ -212,7 +213,7 @@ std::string Server::commandRequest(Buffer *buf) {
         }
     } else if (cmd_ == "rpop") {
 
-    } else if (cmd_ == "hset") {
+    } else if (cmd_ == "rpush") {
 
     } else if (cmd_ == "hget") {
 

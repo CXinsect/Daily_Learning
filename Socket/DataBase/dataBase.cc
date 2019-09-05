@@ -86,6 +86,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       }
       tmp.insert(make_pair(value,value1));
       Hash_.erase(it);
+      std::cout << "rmp: " << tmp.size() << std::endl;
       Hash_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
       // std::map<std::string, std::string>::iterator iter = it->second.begin();
       // while (iter != it->second.end()) {
@@ -216,17 +217,18 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         std::multimap<std::string, std::string> tmp = it->second;
         char buf[1024] = {0};
         char * pbuf = buf;
+        std::cout << "test" << std::endl;
         int n = 0, len = 0; 
         std::multimap<std::string, std::string>::iterator iter = it->second.begin();
         while(iter != it->second.end()) {
           auto pos = tmp.equal_range(iter->first);
           while (pos.first != pos.second) {
+            std::cout << "test " << pos.first->first << ": " << pos.first->second << std::endl;
             n = snprintf(pbuf+len,sizeof(buf)-len,"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
             len += n;
             pos.first++;
             iter++;
           }
-            iter++;
         }
         ret = buf;
       }
