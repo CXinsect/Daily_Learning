@@ -80,15 +80,12 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
     } else {
       std::multimap<std::string, std::string> tmp;
       std::multimap <std::string,std::string>::iterator iter = it->second.begin();
-      std::cout << iter->first << " " << iter->second << std::endl;
       while(iter != it->second.end()) {
         tmp.insert(make_pair(iter->first,iter->second));
         iter++;
       }
       tmp.insert(make_pair(value,value1));
-
       Hash_.erase(it);
-      std::cout << "getkeyspace size: " << tmp.size() << std::endl;
       Hash_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
       // std::map<std::string, std::string>::iterator iter = it->second.begin();
       // while (iter != it->second.end()) {
@@ -111,8 +108,9 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       List_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
     } else {
       //更新list的值
-      List_.erase(it);
+      std::list<std::string>::iterator iter = it->second.begin();
       std::list<std::string> tmp;
+      List_.erase(it);
       tmp.push_back(value_);
       List_.insert(make_pair(make_pair(key_, expiresTime+getTimestamp()), tmp));
       // std::list<std::string>::iterator iter = it->second.begin();
@@ -198,7 +196,6 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
           it++;
       }
       if (it == String_.end()) ret = "Not Found";
-      // std::cout << "Not Found" << std::endl;
       else
         ret = it->second;
     } else if (type == DataStructure::ObjHash) {
@@ -217,29 +214,21 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         ret = "Not Found";
       } else {
         std::multimap<std::string, std::string> tmp = it->second;
-        std::cout << "size: --" << tmp.size() << std::endl;
         char buf[1024] = {0};
         char * pbuf = buf;
-        int len = 0;
+        int n = 0, len = 0; 
         std::multimap<std::string, std::string>::iterator iter = it->second.begin();
         while(iter != it->second.end()) {
-          std::cout << "multimap" << iter->first << std::endl;
-          // auto pos = tmp.equal_range(iter->first);
-          // int n = snprintf(pbuf,sizeof(buf)-len,"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
-          // assert(n >= 0);
-          // len += n;
-          // while(++pos.first != pos.second) {
-          //   n = snprintf(pbuf+len,sizeof(buf)-len,"%s ",pos.first->first.c_str());
-          //   len += n;
-          // }
-          int n = snprintf(pbuf+len,sizeof(buf)-len,"%s %s ",iter->first.c_str(),iter->second.c_str());
-          len += n;
-          iter++;
+          auto pos = tmp.equal_range(iter->first);
+          while (pos.first != pos.second) {
+            n = snprintf(pbuf+len,sizeof(buf)-len,"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
+            len += n;
+            pos.first++;
+            iter++;
+          }
+            iter++;
         }
-        
         ret = buf;
-        // for(auto pos = iter->equa)
-        // ret = iter->second;
       }
     } else if (type == DataStructure::ObjList) {
       std::map<std::pair<std::string, long long>,

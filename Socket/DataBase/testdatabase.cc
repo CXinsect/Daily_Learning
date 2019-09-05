@@ -3,7 +3,9 @@
 int main (void) {
     DataBase base(10);
      base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","color","white",DefaultTime);
-     base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","name","black",DefaultTime);
+     base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","color","black",DefaultTime);
+
+     base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","name","lala",DefaultTime);
      base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","gender","m",DefaultTime);
     
     // sleep(4);
