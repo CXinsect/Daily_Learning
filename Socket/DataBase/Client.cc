@@ -121,26 +121,6 @@ void Client::sendRequest( const std::string &buf ) {
                                                                 (int)key1.size(),key1.c_str(),
                                                                 (int)value.size(),value.c_str());
         AuxiliaryFun(buffer);
-    } else if(cmd == "rpop") {
-        str >> key;
-        assert(key.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
-                                                          (int)key.size(),key.c_str());
-        AuxiliaryFun(buffer);
-    } else if(cmd == "rpush") {
-        str >> key;
-        assert(key.c_str() != NULL);
-        std::string skey;
-        str >> skey;
-        assert(skey.c_str() != NULL);
-        str >> value;
-        assert(value.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
-                                                          (int)key.size(),key.c_str(),
-                                                          (int)skey.size(),skey.c_str(),
-                                                          (int)value.size(),value.c_str());
-        AuxiliaryFun(buffer);
-
     } else if(cmd == "hget") {
         str >> key;
         snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
@@ -149,10 +129,31 @@ void Client::sendRequest( const std::string &buf ) {
     } else if (cmd == "hgetall") {
         str >> key;
         assert(key.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
-                                                            (int)key.size(),key.c_str());
+        snprintf(buffer,sizeof(buffer),"!%d#%s\r\n",(int)cmd.size(),cmd.c_str());
         AuxiliaryFun(buffer);
-    }
+    }else if(cmd == "rpush") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        std::string value;
+        char _buf[1024] = {0};
+        int num = 0,len = 0;
+        while(str >> value) {
+            num = snprintf(_buf+len,sizeof(_buf)-len,"%s ",value.c_str());
+            len += num;
+        }
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                          (int)key.size(),key.c_str(),
+                                                          (int)strlen(_buf),_buf);
+        AuxiliaryFun(buffer);
+
+    } else if(cmd == "rpop") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+                                                          (int)key.size(),key.c_str());
+        AuxiliaryFun(buffer);
+
+    } 
     else {
         std::cout << "The command entered is incorrect, please re-enter" << std::endl;
         return;

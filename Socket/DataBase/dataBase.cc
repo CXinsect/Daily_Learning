@@ -111,8 +111,13 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       //更新list的值
       std::list<std::string>::iterator iter = it->second.begin();
       std::list<std::string> tmp;
+      while(iter != it->second.end()) {
+        tmp.push_back(*iter);
+        iter++;
+      }
       List_.erase(it);
       tmp.push_back(value_);
+      std::cout << "ListObject size: " << tmp.size() << std::endl;
       List_.insert(make_pair(make_pair(key_, expiresTime+getTimestamp()), tmp));
       // std::list<std::string>::iterator iter = it->second.begin();
       // while(size-- > 0)
@@ -183,6 +188,12 @@ bool DataBase::delKeySpace(int type, const std::string &key) {
     abort();
   }
   return false;
+}
+const std::string DataBase::delListObject(const std::string &key) {
+  auto it = FindList(key);
+  std::string res = it->second.back();
+  it->second.pop_back();
+  return res;
 }
 std::string DataBase::getKeySpace(int type, const std::string &key) {
   std::string ret = std::string();

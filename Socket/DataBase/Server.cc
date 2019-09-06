@@ -86,14 +86,49 @@ const std::string Server::hsetCommand(const std::string &key, const std::string 
                                                         key,value,value1,
                                                         DefaultTime);
     if(flags) return "ok";
-    else return "rpush error";
+    else return "hset error";
 
 }
-const std::string Server::hgetallCommand (const std::string &key) {
+const std::string Server::hgetCommand (const std::string &key) {
     assert(db_index_ >= 0);
     std::string tmp = database_[db_index_].getKeySpace(DataStructure::ObjHash,key);
     return tmp;
 }
+const std::string Server::hgetallCommand () {
+    assert(db_index_ >= 0);
+    auto it = database_[db_index_].getKeySpaceHashObject().begin();
+    std::string tmp,res;
+    while(it != database_[db_index_].getKeySpaceHashObject().end()) {
+        tmp = database_[db_index_].getKeySpace(DataStructure::ObjHash,it->first.first);
+        res += tmp;     
+    }
+    std::cout << "Server[hgetall]: " << res << std::endl;
+    return res;
+}
+const std::string Server::rpushCommand (const std::string &key,const std::string &value) {
+    assert(db_index_ >= 0);
+    std::string res = std::string();
+    std::istringstream str(value);
+    std::string tmp;
+    bool flags;
+    while(str >> tmp) {
+        std::cout << "test rpush " << std::endl;
+        flags = database_[db_index_].addKeySpace(DataStructure::ObjList,
+                                                       DataStructure::EncodingRaw,
+                                                        key,tmp,DataStructure::SpareTire,
+                                                        DefaultTime);
+    }
+    if(flags) res = "ok";
+    else res = "rpush error";
+    return res;
+}
+const std::string Server::rpopCommand(const std::string &key) {
+    assert(db_index_ >= 0);
+    std::string res = database_[db_index_].delListObject(key);
+    if(res.size() >= 0) return res;
+    else return "rpop error";
+}
+
 std::string Server::commandRequest(Buffer *buf) {
     std::string res = std::string();
     std::string org = buf->retrieveAllAsString();
@@ -200,7 +235,7 @@ std::string Server::commandRequest(Buffer *buf) {
             value_ = org.substr(ret+1,skeylen_);
             res = it->callback(key_,skey_,value_,"","","");
         }
-    } else if(cmd_ == "hgetall") {
+    } else if(cmd_ == "hget") {
         std::vector <cmdTable>::iterator it = cmdtable_.begin();
         while(it != cmdtable_.end() && it->name != cmd_) it++;
         if(it == cmdtable_.end()) res = "Not Found This Command";
@@ -212,10 +247,37 @@ std::string Server::commandRequest(Buffer *buf) {
             res = it->callback(key_,"","","","","");
         }
     } else if (cmd_ == "rpop") {
-
+        auto it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) res = "Not Found This Command";
+        else {
+            pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            key_ = org.substr(ret+1,keylen_);
+            res = it->callback(key_,"","","","","");
+        }
     } else if (cmd_ == "rpush") {
-
-    } else if (cmd_ == "hget") {
+        auto it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) res = "Not Found This Command";
+        else {
+            pos = org.find('!',ret);
+            ret = org.find('@',pos);
+            keylen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            key_ = org.substr(ret+1,keylen_);
+            pos = org.find('!',ret);
+            ret = org.find('$',pos);
+            valuelen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
+            value_ = org.substr(ret+1,valuelen_);
+            res = it->callback(key_,value_,"","","","");
+        }
+    } else if (cmd_ == "hgetall") {
+        auto it = cmdtable_.begin();
+        while(it != cmdtable_.end() && it->name != cmd_) it++;
+        if(it == cmdtable_.end()) res = "Not Found This Command";
+        else 
+            res = it->callback("","","","","","");
 
     } else {
         std::cout << "[Server::commandRequest:] No Command " << std::endl;
