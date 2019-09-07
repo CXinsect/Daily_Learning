@@ -63,7 +63,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
     std::map<std::pair<std::string, long long>, std::string>::iterator it =
         FindString(key);
     if (it == String_.end())
-      String_.insert(make_pair(make_pair(key, expiresTime_), value_));
+      String_.insert(make_pair(make_pair(key, expiresTime+getTimestamp()), value_));
     else {
         String_.erase(it);
         String_.insert(make_pair(make_pair(key_,expiresTime+getTimestamp()),value_));
@@ -76,7 +76,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
     if (it == Hash_.end()) {
       std::multimap<std::string, std::string> tmp;
       tmp.insert(make_pair(value_, value1_));
-      Hash_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
+      Hash_.insert(make_pair(make_pair(key_, expiresTime+getTimestamp()), tmp));
     } else {
       std::multimap<std::string, std::string> tmp;
       std::multimap <std::string,std::string>::iterator iter = it->second.begin();
@@ -106,7 +106,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
     if (it == List_.end()) {
       std::list<std::string> tmp;
       tmp.push_back(value_);
-      List_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
+      List_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
     } else {
       //更新list的值
       std::list<std::string>::iterator iter = it->second.begin();
@@ -366,7 +366,7 @@ void DataBase::rdbLoad() {
     pos = data.find("EXPIRETIME");
     db_num_ = atoi(InterceptString(data, ret + 8, pos).c_str());
     ret = data.find_first_of('^');
-    expiresTime_ = atoi(InterceptString(data, pos + 10, ret).c_str());
+    long long expiresTime_ = atoi(InterceptString(data, pos + 10, ret).c_str());
     pos = data.find_first_of('!');
     type_ = atoi(InterceptString(data, ret + 1, pos).c_str());
     std::cout << "Type: " << type_ << std::endl;

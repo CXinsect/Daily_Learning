@@ -75,7 +75,6 @@ class DataBase {
   int valueLen_;
   std::string value1_;
   int ListSize_;
-  long long expiresTime_ = DefaultTime;
   //键空间中的实际对象
   String String_;
   Hash Hash_;

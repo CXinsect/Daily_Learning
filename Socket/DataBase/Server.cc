@@ -98,11 +98,15 @@ const std::string Server::hgetallCommand () {
     assert(db_index_ >= 0);
     auto it = database_[db_index_].getKeySpaceHashObject().begin();
     std::string tmp,res;
+    std::string transition;
     while(it != database_[db_index_].getKeySpaceHashObject().end()) {
         tmp = database_[db_index_].getKeySpace(DataStructure::ObjHash,it->first.first);
-        res += tmp;     
+        transition = it->first.first + ": " + tmp + " ";
+        res += transition;
+        it++;
     }
     std::cout << "Server[hgetall]: " << res << std::endl;
+    if(res.size() == 0) res = "Not Found";
     return res;
 }
 const std::string Server::rpushCommand (const std::string &key,const std::string &value) {
@@ -128,7 +132,6 @@ const std::string Server::rpopCommand(const std::string &key) {
     if(res.size() >= 0) return res;
     else return "rpop error";
 }
-
 std::string Server::commandRequest(Buffer *buf) {
     std::string res = std::string();
     std::string org = buf->retrieveAllAsString();
@@ -232,7 +235,8 @@ std::string Server::commandRequest(Buffer *buf) {
             pos = org.find('!',ret);
             ret = org.find('$',pos);
             valuelen_ = atoi(org.substr(pos+1,ret-pos-1).c_str());
-            value_ = org.substr(ret+1,skeylen_);
+            value_ = org.substr(ret+1,valuelen_);
+            std::cout << "value: " << value_ << "size: " << value_.size() << std::endl;
             res = it->callback(key_,skey_,value_,"","","");
         }
     } else if(cmd_ == "hget") {
