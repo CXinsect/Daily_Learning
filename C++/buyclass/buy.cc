@@ -146,5 +146,24 @@ std::ostream & operator << (std::ostream &os, const Query &query) {
 }
 class WordQuery :public Query_base {
     friend class Query;
-    WordQuery()
+    WordQuery(const std::string &s) :query_word(s) {}
+    QueryResult eval(const TextQuery &t) const {
+        return t.query(query_word);    
+    }
+    std::string rep() { return query_word; }
+    std::string query_word;
+};
+
+inline Query::Query(const std::string &s) q(new WordQuery(s)) {}
+
+class NotQuery : public Query_base {
+    friend Query operator ~(const Query &);
+    NotQuery(const Query &q) : query(q) {}
+    std::string rep() const { return "~(" + query.rep() + ")"; }
+    QueryResult eval( const TextQuery &) const;
+    Query query;
+};
+
+inline Query operator ~(const Query &operand) {
+    return std::shared_ptr <Query_base> (new NotQuery (operand));
 }
