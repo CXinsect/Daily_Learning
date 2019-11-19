@@ -11,7 +11,7 @@ void TcpConnection::handleRead() {
     handClose();
   } else {
     std::cout << "TcpConnection Error:: handRead" << std::endl;
-    // handClose();
+    //handClose();
   }
 }
 void TcpConnection::handWrite() {
@@ -82,7 +82,8 @@ void TcpConnection::sendInLoop(const std::string& message) {
   assert(nwrite >= 0);
   if (boost::implicit_cast<size_t>(nwrite) < message.size()) {
     outputBuffer_.Append(message.c_str() + nwrite, message.size() - nwrite);
-    if (!channel_->isWriteing()) channel_->enableWriteing();
+    if (!channel_->isWriteing()) 
+      channel_->enableWriteing();
   }
 }
 void TcpConnection::shutdown() {

@@ -15,7 +15,7 @@ class EventLoop {
                         quit_(false),
                         eventHanding_(false),
                         // poller_(Poller::newDefaultPoller(this)) 
-                        poller_(new _Poller::Poller)
+                        poller_(new _Poller::Poller())
                         {};
         ~EventLoop();
         typedef std::function <void()> lifeCycle;

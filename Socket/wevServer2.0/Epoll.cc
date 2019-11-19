@@ -19,8 +19,8 @@ void _Poller::Poller::updateChannel(Channel* channel) {
         assert(channels_.find(channel->getFd()) == channels_.end());
         struct epoll_event efd;
         efd.data.ptr = static_cast<void*>(channel);
-        assert(epoll_ctl(epollfd_,EPOLL_CTL_ADD,channel->getFd(),&efd) != -1);
         efd.events = static_cast<short>(channel->getEvents());
+        assert(epoll_ctl(epollfd_,EPOLL_CTL_ADD,channel->getFd(),&efd) != -1);
         events_.push_back(efd);
         int index = static_cast<int>(events_.size() - 1);
         channel->setIndex(index);
@@ -30,17 +30,18 @@ void _Poller::Poller::updateChannel(Channel* channel) {
         assert(channels_.find(channel->getFd()) != channels_.end());
         assert(channels_[channel->getFd()] == channel);
         int index = channel->getIndex();
-        assert(index >= 0 && index < static_cast<int>(events_.size() - 1));
+        assert(index >= 0 && index < static_cast<int>(events_.size()));
         struct epoll_event& efd = events_[index];
         assert(static_cast<Channel*>(efd.data.ptr)->getFd() == channel->getFd() || static_cast<Channel*>(efd.data.ptr) ->getFd() == -channel->getFd()-1);
         efd.data.ptr = static_cast<void*>(channel);
-        assert(epoll_ctl(epollfd_,EPOLL_CTL_MOD,channel->getFd(),&efd) != -1);
         efd.events = static_cast<short>(channel->getEvents());
         if(channel->isNoneEvent()) {
             Channel* tmp = static_cast<Channel*>(efd.data.ptr);
             int tfd = channel->getFd();
-            tmp->setFd(-tfd-1);
+            // tmp->setFd(-tfd-1);
         }
+        assert(epoll_ctl(epollfd_,EPOLL_CTL_MOD,channel->getFd(),&efd) != -1);
+
     }
 }
 
