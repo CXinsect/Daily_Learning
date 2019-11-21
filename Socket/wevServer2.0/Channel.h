@@ -15,6 +15,7 @@ class Channel {
   void setWriteCallBack(const EventCallBack &cb) { writeCallBack_ = cb; }
   void setErrCallBack(const EventCallBack &cb) { errCallBack_ = cb; }
   void setCloseCallBack(const EventCallBack &cb) { closeCallBack_ = cb; }
+  void setForceCloseCallBack(const EventCallBack& cb) { forceCallBack_ = cb; }
   int getFd () { return fd_; }
   void setFd (int fd) { fd_ = fd; }
   int getEvents() const { return events_; }
@@ -61,6 +62,7 @@ class Channel {
   EventCallBack writeCallBack_;
   EventCallBack errCallBack_;
   EventCallBack closeCallBack_;
+  EventCallBack forceCallBack_;
   bool eventHanding_;
   bool tied_;
   boost::weak_ptr<void> tie_;

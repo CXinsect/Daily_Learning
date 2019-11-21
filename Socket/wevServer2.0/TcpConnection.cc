@@ -11,7 +11,7 @@ void TcpConnection::handleRead() {
     handClose();
   } else {
     std::cout << "TcpConnection Error:: handRead" << std::endl;
-    //handClose();
+    // handClose();
   }
 }
 void TcpConnection::handWrite() {
@@ -34,14 +34,18 @@ void TcpConnection::handWrite() {
 }
 void TcpConnection::handClose() {
   std::cout << "TcpConnection handclose " << channel_->getFd() << std::endl;
-  assert(state_ == Connected || state_ == Disconnecting);
+  //assert(state_ == Connected || state_ == Disconnecting);
+  assert(state_ == Connected);
   setState(Disconnceted);
   channel_->disableAll();
 
   //延长生命周期
   TcpConnectionPtr guard(shared_from_this());
   connectionCallBack_(guard);
-  closeCallBack_(guard);
+  closeCallBack_(shared_from_this());
+}
+void TcpConnection::forceClose () {
+  ::close(channel_->getFd());
 }
 void TcpConnection::connectionClose() {
   assert(state_ == Connected);
@@ -82,8 +86,10 @@ void TcpConnection::sendInLoop(const std::string& message) {
   assert(nwrite >= 0);
   if (boost::implicit_cast<size_t>(nwrite) < message.size()) {
     outputBuffer_.Append(message.c_str() + nwrite, message.size() - nwrite);
-    if (!channel_->isWriteing()) 
+    if (!channel_->isWriteing()) {
       channel_->enableWriteing();
+      std::cout << "More Data Senting Has Been Started" << std::endl;
+    }
   }
 }
 void TcpConnection::shutdown() {

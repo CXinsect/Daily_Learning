@@ -27,7 +27,7 @@ class TcpConnection :
             channel_->setWriteCallBack(boost::bind(&TcpConnection::handWrite,this));
             channel_->setCloseCallBack(boost::bind(&TcpConnection::handClose,this));
             channel_->setErrCallBack(boost::bind(&TcpConnection::handClose,this));
-
+            channel_->setForceCallBack(boost::bind(&TcpConnection::forceClose,this));
         }
         void setConnectionCallBack(ConnectionCallBack &cb) {
             connectionCallBack_ = cb;
@@ -37,6 +37,9 @@ class TcpConnection :
         }
         void setCloseCallBack(const CloseCallBack &cb) {
             closeCallBack_ = cb;
+        }
+        void setForceCallBack (const CloseCallBack& cb) {
+            forceCloseCallBack_ = cb;
         }
         const string & getName() { return name_; }
         bool isConnected() { return state_ == Connected; }
@@ -50,6 +53,7 @@ class TcpConnection :
         void connectEstablished();
         EventLoop* getLoop() { return loop_;}
         void handClose();
+        void forceClose();
         void connectionClose();
         void setRequest(std::shared_ptr<webRequest>request) { 
             request_ = request;
@@ -68,6 +72,7 @@ class TcpConnection :
         ConnectionCallBack connectionCallBack_;;
         MessageCallBack messageCallBack_;
         CloseCallBack closeCallBack_;
+        CloseCallBack forceCloseCallBack_;
         Buffer inputBuffer_;
         Buffer outputBuffer_;
         std::shared_ptr<webRequest>request_;   

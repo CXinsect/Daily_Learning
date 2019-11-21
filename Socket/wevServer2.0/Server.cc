@@ -37,6 +37,7 @@ void Server::onRequest(const TcpConnectionPtr& conn,
   
   do {
       if(!flags) {
+          std::cout << "<<<<<flags error" << std::endl;
           conn->connectionClose();
           break;
       }
