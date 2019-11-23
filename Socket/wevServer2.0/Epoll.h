@@ -15,7 +15,7 @@ namespace _Poller {
             }
             ~Poller() { ::close(epollfd_); }
             typedef std::vector<Channel*> channelList;
-            void poll (channelList* activeChannelList);
+            void poll (channelList* activeChannelList,int timeout);
             void updateChannel(Channel* channel);
             void removeChannel(Channel* channel);
         

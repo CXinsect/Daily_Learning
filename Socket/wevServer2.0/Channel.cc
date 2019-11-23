@@ -27,14 +27,13 @@ void Channel::handleEvent() {
       eventHanding_ = true;
       if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
         std::cout << "Channel::handleEvent() POLLHUP" << std::endl;
-          // if (closeCallBack_) closeCallBack_();
+          if(closeCallBack_) closeCallBack_();
       }
       if (revents_ & EPOLLERR)
         if (errCallBack_) errCallBack_();
       if (revents_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP))
         if (readCallBack_) readCallBack_();
       if (revents_ & EPOLLOUT) {
-        std::cout << "comming in" << std::endl;
           if (writeCallBack_) writeCallBack_();
       }
         
@@ -58,7 +57,6 @@ void Channel::handleEvent() {
 }
 void Channel::remove(void) {
   assert(isNoneEvent());
-
   loop_->removeChannel(this);
 }
 

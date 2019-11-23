@@ -11,7 +11,7 @@ void TcpConnection::handleRead() {
     handClose();
   } else {
     std::cout << "TcpConnection Error:: handRead" << std::endl;
-    // handClose();
+    handClose();
   }
 }
 void TcpConnection::handWrite() {
@@ -19,6 +19,7 @@ void TcpConnection::handWrite() {
     std::cout << "writeing" << std::endl;
     ssize_t n = ::write(channel_->getFd(), outputBuffer_.peek(),
                         outputBuffer_.getReadableBytes());
+    std::cout << "writing Bytes: " << n <<std::endl;
     if (n > 0) {
       outputBuffer_.retrieve(n);
       if (outputBuffer_.getReadableBytes() == 0) {
@@ -34,17 +35,27 @@ void TcpConnection::handWrite() {
 }
 void TcpConnection::handClose() {
   std::cout << "TcpConnection handclose " << channel_->getFd() << std::endl;
-  //assert(state_ == Connected || state_ == Disconnecting);
-  assert(state_ == Connected);
-  setState(Disconnceted);
-  channel_->disableAll();
+  
+  do {
+     if(state_ == Disconnceted) {
+      forceClose();
+      break;
+    }
+    assert(state_ == Connected || state_ == Disconnecting);
+    setState(Disconnceted);
+    channel_->disableAll();
 
-  //延长生命周期
-  TcpConnectionPtr guard(shared_from_this());
-  connectionCallBack_(guard);
-  closeCallBack_(shared_from_this());
+    //延长生命周期
+    TcpConnectionPtr guard(shared_from_this());
+    connectionCallBack_(guard);
+    closeCallBack_(shared_from_this());
+  }while(0);
 }
 void TcpConnection::forceClose () {
+   assert(state_ == Disconnceted);
+   setState(Disconnceted);
+   channel_->disableAll();
+   channel_->remove();
   ::close(channel_->getFd());
 }
 void TcpConnection::connectionClose() {
@@ -70,7 +81,6 @@ void TcpConnection::sendInLoop(const std::string& message) {
   ssize_t nwrite = 0;
   std::cout << "Sendinloop:: Messgae : " << message << std::endl;
   if (!channel_->isWriteing() && outputBuffer_.getReadableBytes() == 0) {
-    std::cout << "writeing" << std::endl;
     nwrite = ::write(channel_->getFd(), message.c_str(), message.size());
     if (nwrite >= 0) {
       if (boost::implicit_cast<size_t>(nwrite) < message.size()) {

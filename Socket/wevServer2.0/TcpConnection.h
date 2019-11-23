@@ -27,7 +27,7 @@ class TcpConnection :
             channel_->setWriteCallBack(boost::bind(&TcpConnection::handWrite,this));
             channel_->setCloseCallBack(boost::bind(&TcpConnection::handClose,this));
             channel_->setErrCallBack(boost::bind(&TcpConnection::handClose,this));
-            channel_->setForceCallBack(boost::bind(&TcpConnection::forceClose,this));
+            // channel_->setForceCloseCallBack(boost::bind(&TcpConnection::forceClose,this));
         }
         void setConnectionCallBack(ConnectionCallBack &cb) {
             connectionCallBack_ = cb;

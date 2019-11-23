@@ -68,10 +68,10 @@ void _Poller::Poller::removeChannel(Channel* channel) {
     
 }
 
-void _Poller::Poller::poll (channelList* activeChannel) {
+void _Poller::Poller::poll (channelList* activeChannel,int timeout) {
     assert(epollfd_ > 0);
     std::cout <<"Hello" << std::endl;
-    int numEvents = ::epoll_wait(epollfd_,&*events_.begin(),static_cast<int>(events_.size()),-1);
+    int numEvents = ::epoll_wait(epollfd_,&*events_.begin(),static_cast<int>(events_.size()),timeout);
     if(numEvents > 0) {
         fillActiveChannels(numEvents,activeChannel);
         if(static_cast<size_t>(numEvents) == events_.size()) {
