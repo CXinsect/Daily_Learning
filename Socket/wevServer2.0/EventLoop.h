@@ -1,13 +1,13 @@
 #ifndef _EVENT_LOOP_H_
 #define _EVENT_LOOP_H_
+#include "currentThread.h"
 #include "Universal_head.h"
 #include "Channel.h"
 #include "Epoll.h"
-#include "currentThread.h"
 class Channel;
 // class Poller;
 
-__thread EventLoop* loopInThisThread = 0;
+extern __thread EventLoop* loopInThisThread;
 
 class EventLoop {
     public:

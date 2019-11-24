@@ -1,27 +1,32 @@
 #include "EventLoop.h"
 #include "Channel.cc"
-// #include "Poller.cc"
-// int kPollTimeMs = 5*1000;
-// void EventLoop::loop() {
-//     assert(!looping_);
-//     looping_ = true;
-//     quit_ = false;
-//     while(!quit_) {
-//         std::cout << "Loop" << std::endl;
-//         activeChannels_.clear();
-//         poller_->poll(&activeChannels_,-1);
-//         eventHanding_ = true;
-//         for(ChannelList::iterator it = activeChannels_.begin();
-//             it != activeChannels_.end();it++) {
-//                 (*it)->handleEvent();
-//             }
-//         eventHanding_ = false;
-//     }
-//     std::cout << "Event is going to be Stoped" << std::endl;
-//     looping_ = false;
-// }
+
+__thread EventLoop* loopInThisThread = 0;
+
+#include "Poller.cc"
+int kPollTimeMs = 5*1000;
+void EventLoop::loop() {
+    assert(!looping_);
+    assertInLoopThread();
+    looping_ = true;
+    quit_ = false;
+    while(!quit_) {
+        std::cout << "Loop" << std::endl;
+        activeChannels_.clear();
+        poller_->poll(&activeChannels_,-1);
+        eventHanding_ = true;
+        for(ChannelList::iterator it = activeChannels_.begin();
+            it != activeChannels_.end();it++) {
+                (*it)->handleEvent();
+            }
+        eventHanding_ = false;
+    }
+    std::cout << "Event is going to be Stoped" << std::endl;
+    looping_ = false;
+}
 void EventLoop::updateChannel(Channel * channel) {
     assert(channel->owerLoop() == this);
+    assertInLoopThread();
     poller_->updateChannel(channel);
 }
 void EventLoop::quit() {

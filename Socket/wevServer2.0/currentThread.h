@@ -1,25 +1,28 @@
 #ifndef __CURRENT_THREAD_H_
 #define __CURRENT_THREAD_H_
 #include <iostream>
+#include <sys/syscall.h>
+#include <sys/prctl.h>
+#include <unistd.h>
 using namespace std;
 
 namespace currentThread
 {
-  __thread int t_cachedTid = 0;
+  extern __thread int t_cachedTid;
 //   extern __thread char t_tidString[32];
 //   extern __thread int t_tidStringLength;
 //   extern __thread const char* t_threadName;
-  void cacheTid();
+  pid_t gettid (); 
 
-  inline int tid()
-  {
-    if (__builtin_expect(t_cachedTid == 0, 0))
-    {
-      cacheTid();
+  void cacheTid (); 
+  
+  inline int tid() {
+        if (__builtin_expect(t_cachedTid == 0, 0))
+        {
+        cacheTid();
+        }
+        return t_cachedTid;
     }
-    return t_cachedTid;
-  }
-
 //   inline const char* tidString() // for logging
 //   {
 //     return t_tidString;
