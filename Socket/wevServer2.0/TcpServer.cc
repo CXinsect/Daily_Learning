@@ -35,7 +35,6 @@ void TcpServer::newConnection (int sockfd,const Address& peerAddr) {
     Address localAddr(sockets::getLocalAddr(sockfd));
     TcpConnectionPtr conn (new TcpConnection(loop_,name,sockfd,localAddr,peerAddr));
     connection_[name] = conn;
-    // sleep(500);
     conn->setConnectionCallBack(connectionBack_);
     conn->setMessageCallBack(messageBack_);
     conn->setCloseCallBack(boost::bind(&TcpServer::removeConnection, this, _1));
@@ -45,7 +44,7 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
     std::cout << "removeConnection: "<< name_ <<std::endl;
     size_t n = connection_.erase(conn->getName()); 
     assert(n == 1);
-    loop_->queueLoop(boost::bind(&TcpConnection::connectionClose,conn));
+    loop_->queueInLoop(boost::bind(&TcpConnection::connectionClose,conn));
 }
 void TcpServer::start() {
     loop_->runInLoop(std::bind(&Acceptor::Listen,acceptor_.get()));
