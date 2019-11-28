@@ -11,7 +11,7 @@ extern void defaultMessageCallback(const TcpConnectionPtr&conn,
 {
     buf->retrieveAllBytes();
 }
-TcpServer::TcpServer(EventLoop *loop,
+TcpServer::TcpServer(EventLoop* loop,
                           const Address &listenAddr,
                           const std::string& name)
     : loop_(loop),

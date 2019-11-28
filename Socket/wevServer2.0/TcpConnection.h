@@ -41,6 +41,12 @@ class TcpConnection :
         void setForceCallBack (const CloseCallBack& cb) {
             forceCloseCallBack_ = cb;
         }
+        void setContext (boost::any const& context) {
+            context_ = context;
+        }
+        const boost::any& getContext() const {
+            return context_;
+        }
         const string & getName() { return name_; }
         bool isConnected() { return state_ == Connected; }
         bool isDisconnected() { return state_ == Disconnceted; }
@@ -48,7 +54,7 @@ class TcpConnection :
         void send(Buffer *buffer);
         void shutdown();
         void startRead();
-        bool reading() { return reading_; };
+        bool reading() { return reading_; }
         void stopRead();
         void connectEstablished();
         EventLoop* getLoop() { return loop_;}
@@ -69,13 +75,14 @@ class TcpConnection :
         boost::scoped_ptr<Channel> channel_;
         Address localAddr_;
         Address peerAddr_;
-        ConnectionCallBack connectionCallBack_;;
+        ConnectionCallBack connectionCallBack_;
         MessageCallBack messageCallBack_;
         CloseCallBack closeCallBack_;
         CloseCallBack forceCloseCallBack_;
         Buffer inputBuffer_;
         Buffer outputBuffer_;
         std::shared_ptr<webRequest>request_;   
+        boost::any context_;
         // ErrCallBack errCallBack_;
         void setState(State s) { state_ = s;}
         void handleRead();

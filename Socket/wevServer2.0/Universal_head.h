@@ -26,6 +26,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/circular_buffer.hpp>
+#include <boost/unordered_set.hpp>
 #include <iostream>
 #include <map>
 #include <memory>
