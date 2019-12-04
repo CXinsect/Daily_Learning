@@ -10,17 +10,17 @@ public:
     int numberOfBoomerangs(vector<vector<int>>& points) {
         map<int,int>a;
         for(int i = 0;i < points.size();i++) {
-            for(int j = i+1;j < points.size();j++) {
-                a[s(points[i],points[j])]++;
+            for(int j = 0;j < points.size();j++) {
+                if(j != i)
+                    a[s(points[i],points[j])]++;
             }
         }
         int ret = 0;
-        for(int i = 0;i < points.size();i++) {
-            for(int j = i+1;j < points.size();j++) {
-                if(a.find(s(points[i],points[j])) != a.end()) {
-                    ret += a[s(points[i],points[j])];
-                }
-            }
+        for(map<int,int>::iterator iter = a.begin();
+                iter != a.end();iter++) 
+        {
+            if(iter->second >=2 )
+            ret += iter->second * (iter->second-1);
         }
         return ret;
     }
