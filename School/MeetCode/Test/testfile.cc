@@ -4,7 +4,7 @@
 #include <iostream>
 #include <list>
 #include <string>
-#include "model.h"
+#include "../Server/model.h"
 std::string InterceptString(const std::string ptr, int pos1, int pos2) {
     if(pos1 > pos2) std::swap(pos1,pos2);
     int gap = pos2 - pos1;

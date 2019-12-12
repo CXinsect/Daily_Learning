@@ -1,4 +1,4 @@
-#include "model.h"
+#include "../Server/model.h"
 
 int main (void) {
     char buf[1024] = {0};

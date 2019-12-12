@@ -29,6 +29,7 @@ void Persistence::rdbSave () {
             int ret = sigaction(SIGUSR1,&act,NULL);
             assert(ret != -1);
             ret = sigprocmask(SIG_UNBLOCK,&set,NULL);
+            cout << "sleep" << endl;
             assert(ret == 0);
             sigStop_ = true;
         }while(!sigStop_);
@@ -112,10 +113,11 @@ void Persistence::rdbSave () {
                 it++;
             }
         }
+        cout << "Finished" << endl;
         //Signal the parent process
          kill(getppid(),SIGUSR1);
+         return;
     }
     //wait for child process
-        int ret = waitpid(-1,NULL,WNOHANG);
-        assert(ret != -1);
+    while(waitpid(-1,NULL,WNOHANG) != -1);
 }

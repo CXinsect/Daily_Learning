@@ -1,6 +1,6 @@
 #ifndef _CLIENT_H_
 #define _CLIENT_H_
-#include "model.h"
+#include "../Server/model.h"
 
 const int TimeValue = 60;
 class Client {
@@ -55,7 +55,7 @@ class Client {
             setNoOrBlocking(confd_);
             ret = Io::readn(confd_,buffer,1024);
             assert(ret != -1);
-            std::cout << "Response: " << buffer << ret << std::endl;
+            std::cout << "Response: " << buffer+1 << ret;
             memset(buffer,0,1024);
         }
     private:

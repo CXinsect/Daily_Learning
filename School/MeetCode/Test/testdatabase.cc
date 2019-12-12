@@ -1,4 +1,4 @@
-#include "dataBase.cc"
+#include "../Server/dataBase.cc"
 
 int main (void) {
     DataBase base(10);

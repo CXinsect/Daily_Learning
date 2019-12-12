@@ -17,11 +17,11 @@ namespace _Redis {
                 status = status;
                 str_ = msg;
             }
-            Status& operator= (const Status& rhs) {
-                status_ = rhs.status_;
-                str_ = rhs.str_;
-                return *this;
-            }
+//            Status& operator= (const Status rhs) {
+//                status_ = rhs.status_;
+//                str_ = rhs.str_;
+//                return *this;
+//            }
             ~Status() { }
             static Status Ok() { return Status(); }
 

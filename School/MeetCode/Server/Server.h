@@ -7,7 +7,7 @@
 // #include "dataBase.cc"
 #include "redisPersistence.cc"
 
-#include "./util/status.h"
+#include "../util/status.h"
 
 using namespace _Redis;
 
@@ -85,6 +85,8 @@ class Server {
         std::string key_;
         std::string skey_;
         std::string value_;
+public:
+        int cmdLen_;
 private:
     Status status_;
 };

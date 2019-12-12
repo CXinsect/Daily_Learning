@@ -69,7 +69,7 @@ void Client::sendRequest( const std::string &buf ) {
         str >> key;
         assert(key.c_str() != NULL);
         assert(confd_ != -1);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*2\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                        (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "set") {
@@ -77,18 +77,19 @@ void Client::sendRequest( const std::string &buf ) {
         assert(key.c_str() != NULL);
         str >> value;
         assert(value.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*3\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",
+                                                            (int)cmd.size(),cmd.c_str(),
                                                             (int)key.size(),key.c_str(),
                                                             (int)value.size(),value.c_str());
        AuxiliaryFun(buffer);
     } else if(cmd == "bgsave") {
-        snprintf(buffer,sizeof(buffer),"!%d#%s\r\n",(int)cmd.size(),cmd.c_str());
+        snprintf(buffer,sizeof(buffer),"*1\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str());
         AuxiliaryFun(buffer);
 
     } else if(cmd == "del") {
         str >> key;
         assert(key.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*2\r\n$%d\r\n%s$\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                           (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
 
@@ -97,7 +98,7 @@ void Client::sendRequest( const std::string &buf ) {
         assert(key.c_str() != NULL);
         str >> value;
         assert(value.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*2\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                                 (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "expire") {
@@ -105,7 +106,7 @@ void Client::sendRequest( const std::string &buf ) {
         assert(key.c_str() != NULL);
         str >> value;
         assert(value.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*3\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                                 (int)key.size(),key.c_str(),
                                                                 (int)value.size(),value.c_str());
        AuxiliaryFun(buffer);
@@ -116,20 +117,20 @@ void Client::sendRequest( const std::string &buf ) {
         str >> key1;
         str >> value;
         std::cout << "Value: " << value.size() << std::endl;
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*4\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                                 (int)key.size(),key.c_str(),
                                                                 (int)key1.size(),key1.c_str(),
                                                                 (int)value.size(),value.c_str());
         AuxiliaryFun(buffer);
     } else if(cmd == "hget") {
         str >> key;
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*2\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                            (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
     } else if (cmd == "hgetall") {
         str >> key;
         assert(key.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s\r\n",(int)cmd.size(),cmd.c_str());
+        snprintf(buffer,sizeof(buffer),"*1\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str());
         AuxiliaryFun(buffer);
     }else if(cmd == "rpush") {
         str >> key;
@@ -137,19 +138,21 @@ void Client::sendRequest( const std::string &buf ) {
         std::string value;
         char _buf[1024] = {0};
         int num = 0,len = 0;
+        int count = 0;
         while(str >> value) {
+            count++;
             num = snprintf(_buf+len,sizeof(_buf)-len,"%s ",value.c_str());
             len += num;
         }
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s!%d$%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*%d\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",count,(int)cmd.size(),cmd.c_str(),
                                                           (int)key.size(),key.c_str(),
-                                                          (int)strlen(_buf),_buf);
+                                                           strlen(_buf),_buf);
         AuxiliaryFun(buffer);
 
     } else if(cmd == "rpop") {
         str >> key;
         assert(key.c_str() != NULL);
-        snprintf(buffer,sizeof(buffer),"!%d#%s!%d@%s\r\n",(int)cmd.size(),cmd.c_str(),
+        snprintf(buffer,sizeof(buffer),"*2\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                           (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
 

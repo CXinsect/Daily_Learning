@@ -2,7 +2,7 @@
 
 int main (void) {
     EventLoop loop;
-    Address listenaddr(8888);
+    Address listenaddr(6379);
     Server server(&loop,listenaddr);
     loop.loop();
 }

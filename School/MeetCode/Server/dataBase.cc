@@ -2,11 +2,10 @@
 
 std::map<std::pair<std::string, long long>, std::string>::iterator
 DataBase::FindString(const std::string &key) {
-  typedef std::map<std::pair<std::string, long long>, std::string>::iterator
-      Iterator;
-  // std::map<std::pair<std::string, long long>, std::string>::iterator it =
-  //     String_.begin();
+  typedef std::map<std::pair<std::string, long long>, std::string>::iterator  Iterator;
+
   std::shared_ptr<Iterator> ptr(new Iterator);
+
   *ptr = String_.begin();
   while (*ptr != String_.end()) {
     if ((*ptr)->first.first == key) {
@@ -207,7 +206,7 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
         } else
           it++;
       }
-      if (it == String_.end()) ret = "Not Found";
+      if (it == String_.end()) ret = Status::NotFound("Not Found").ToString();
       else
         ret = it->second;
     } else if (type == DataStructure::ObjHash) {
@@ -223,7 +222,7 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
       }
       if (it == Hash_.end()) {
         std::cout << "Not Found" << std::endl;
-        ret = "Not Found";
+        ret = Status::NotFound("Not Found").ToString();
       } else {
         std::multimap<std::string, std::string> tmp = it->second;
         char buf[1024] = {0};
@@ -255,14 +254,14 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
       }
       if (it == List_.end()) {
         std::cout << "Not Found" << std::endl;
-        ret = "Not Found";
+        ret = Status::NotFound("Not Found").ToString();
       } else {
         std::list<std::string>::iterator iter = it->second.begin();
         ret = *iter;
       }
     } else {
       std::cout << "Unknown Type" << std::endl;
-      ret = "Not Found";
+      ret = Status::InvalidArgument("InvaildArgument").ToString();
     }
   } else {
     delKeySpace(type, key);

@@ -1,4 +1,4 @@
-#include "model.h"
+#include "../Server/model.h"
 
 void endInt(int *) {
     std::cout << "hello" << std::endl;

@@ -1,7 +1,7 @@
 #include <sys/timerfd.h>
 #include <iostream>
-#include "EventLoop.cc"
-#include "Channel.cc"
+#include "../Server/EventLoop.cc"
+#include "../Server/Channel.cc"
 
 EventLoop *tloop;
 

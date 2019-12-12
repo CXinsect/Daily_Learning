@@ -1,5 +1,5 @@
 // #include "dataBase.h"
-#include "redisPersistence.cc"
+#include "../Server/redisPersistence.cc"
 
 int main (void) {
     std::shared_ptr<DataBase> data(new DataBase(1));

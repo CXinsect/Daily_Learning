@@ -1,5 +1,5 @@
-#include "model.h"
-#include "Client.cc"
+#include "../Server/model.h"
+#include "../Client/Client.cc"
 #include <sstream>
 
 int main (void) {
@@ -12,7 +12,7 @@ int main (void) {
     //     str >> b;
     //     std::cout << buf << std::endl;
     // }
-    Client client(8888,"127.0.0.1",600);
+    Client client(6379,"127.0.0.1",600);
     int ret = client.Connect();
     assert(ret != -1);
     client.getInput();

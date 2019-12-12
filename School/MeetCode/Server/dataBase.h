@@ -1,4 +1,6 @@
 #include "model.h"
+#include "../util/status.h"
+using namespace _Redis;
 
 class DataBase {
  public:
