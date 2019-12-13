@@ -1,55 +1,5 @@
 #include "dataBase.h"
 
-std::map<std::pair<std::string, long long>, std::string>::iterator
-DataBase::FindString(const std::string &key) {
-  typedef std::map<std::pair<std::string, long long>, std::string>::iterator  Iterator;
-
-  std::shared_ptr<Iterator> ptr(new Iterator);
-
-  *ptr = String_.begin();
-  while (*ptr != String_.end()) {
-    if ((*ptr)->first.first == key) {
-      break;
-    } else
-      (*ptr)++;
-  }
-  return (*ptr);
-}
-std::map<std::pair<std::string, long long>,
-         std::multimap<std::string, std::string>>::iterator
-DataBase::FindHash(const std::string &key) {
-  // std::map<std::pair<std::string, long long>,
-  //          std::map<std::string, std::string>>::iterator it = Hash_.begin();
-  typedef std::map<std::pair<std::string, long long>,
-                   std::multimap<std::string, std::string>>::iterator Iterator;
-  std::shared_ptr<Iterator> ptr(new Iterator);
-  *ptr = Hash_.begin();
-  while (*ptr != Hash_.end()) {
-    if ((*ptr)->first.first == key) {
-      break;
-    } else
-      (*ptr)++;
-  }
-  return (*ptr);
-}
-std::map<std::pair<std::string, long long>, std::list<std::string>>::iterator
-DataBase::FindList(const std::string &key) {
-  // std::map<std::pair<std::string, long long>,
-  //          std::list<std::string>>::iterator it = List_.begin();
-  typedef std::map<std::pair<std::string, long long>,
-                   std::list<std::string>>::iterator Iterator;
-  std::shared_ptr<Iterator> ptr(new Iterator);
-  *ptr = List_.begin();
-  while (*ptr != List_.end()) {
-    if ((*ptr)->first.first == key) {
-      break;
-    } else {
-      size++;
-      (*ptr)++;
-    }
-  }
-  return (*ptr);
-}
 bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
                            const std::string &value, const std::string &value1,
                            long long expiresTime) {
@@ -58,129 +8,91 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
   key_ = key;
   value_ = value;
   value1_ = value1;
+  int tempTime = expiresTime + getTimestamp();
   if (type_ == DataStructure::ObjString) {
-    std::map<std::pair<std::string, long long>, std::string>::iterator it =
-        FindString(key);
-    if (it == String_.end())
-      String_.insert(make_pair(make_pair(key, expiresTime+getTimestamp()), value_));
-    else {
-        String_.erase(it);
-        String_.insert(make_pair(make_pair(key_,expiresTime+getTimestamp()),value_));
-      // setKeySpaceExpiresTime(getTimestamp());
-    }
+      SMap::iterator Siter = sMap_.find(key);
+      if(Siter == sMap_.end()) {
+          String_.insert(make_pair(make_pair(key,tempTime), value_));
+          sMap_.insert(make_pair(key,tempTime));
+      } else {
+          String_.erase({key,sMap_[key]});
+          sMap_.erase(key);
+          sMap_.insert(make_pair(key,tempTime));
+          String_.insert(make_pair(make_pair(key_,tempTime),value_));
+      }
   } else if (type == DataStructure::ObjHash) {
-    std::map<std::pair<std::string, long long>,
-             std::multimap<std::string, std::string>>::iterator it =
-        FindHash(key);
-    if (it == Hash_.end()) {
-      std::multimap<std::string, std::string> tmp;
-      tmp.insert(make_pair(value_, value1_));
-      Hash_.insert(make_pair(make_pair(key_, expiresTime+getTimestamp()), tmp));
-    } else {
-      std::multimap<std::string, std::string> tmp;
-      std::multimap <std::string,std::string>::iterator iter = it->second.begin();
-      while(iter != it->second.end()) {
-        tmp.insert(make_pair(iter->first,iter->second));
-        iter++;
+      HMap::iterator Hiter = hMap_.find(key);
+      if(Hiter == hMap_.end()) {
+          std::multimap<std::string, std::string> tmp;
+          tmp.insert(make_pair(value_, value1_));
+          Hash_.insert(make_pair(make_pair(key_, tempTime), tmp));
+          hMap_.insert(make_pair(key,tempTime));
+      } else {
+          std::multimap<std::string, std::string> tmp;
+          Hash::iterator it = Hash_.find({key,hMap_[key]});
+          std::multimap <std::string,std::string>::iterator iter = it->second.begin();
+          while(iter != it->second.end()) {
+              tmp.insert(make_pair(iter->first,iter->second));
+              iter++;
+          }
+          tmp.insert(make_pair(value,value1));
+          std::cout << "rmp: " << tmp.size() << std::endl;
+          Hash_.erase({key,hMap_[key]});
+          hMap_.erase(key);
+          Hash_.insert(make_pair(make_pair(key,tempTime),tmp));
+          hMap_.insert(make_pair(key,tempTime));
       }
-      tmp.insert(make_pair(value,value1));
-      Hash_.erase(it);
-      std::cout << "rmp: " << tmp.size() << std::endl;
-      Hash_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
-      // std::map<std::string, std::string>::iterator iter = it->second.begin();
-      // while (iter != it->second.end()) {
-      //   if (iter->first == key)
-      //     break;
-      //   else {
-      //     iter++;
-      //   }
-      // }
-      // //此刻该键值肯定存在
-      // iter->second = value;
-    }
   } else if (type == DataStructure::ObjList) {
-    std::map<std::pair<std::string, long long>,
-             std::list<std::string>>::iterator it = FindList(key);
-    //如果没有找到则加入新元素　否则更新键值
-    if (it == List_.end()) {
-      std::list<std::string> tmp;
-      tmp.push_back(value_);
-      List_.insert(make_pair(make_pair(key_, expiresTime + getTimestamp()), tmp));
-    } else {
-      //更新list的值
-      std::list<std::string>::iterator iter = it->second.begin();
-      std::list<std::string> tmp;
-      while(iter != it->second.end()) {
-        tmp.push_back(*iter);
-        iter++;
-      }
-      List_.erase(it);
-      tmp.push_back(value_);
-      std::cout << "ListObject size: " << tmp.size() << std::endl;
-      List_.insert(make_pair(make_pair(key_, expiresTime+getTimestamp()), tmp));
-      // std::list<std::string>::iterator iter = it->second.begin();
-      // while(size-- > 0)
-      //     iter++;
-      // *iter = value;
+
+      LMap::iterator lIter = lMap_.find(key);
+      if(lIter == lMap_.end()) {
+          std::list<std::string> tmp;
+          tmp.push_back(value_);
+          List_.insert(make_pair(make_pair(key_,tempTime), tmp));
+          lMap_.insert(make_pair(key,tempTime));
+      } else {
+          //更新list的值
+          auto it = List_.find({key,lIter->second});
+          std::list<std::string>::iterator iter = it->second.begin();
+          std::list<std::string> tmp;
+          while(iter != it->second.end()) {
+              tmp.push_back(*iter);
+              iter++;
+          }
+          tmp.push_back(value_);
+          List_.erase({key,lMap_[key]});
+          lMap_.erase(key);
+          std::cout << "ListObject size: " << tmp.size() << std::endl;
+          List_.insert(make_pair(make_pair(key_,tempTime),tmp));
+          lMap_.insert(make_pair(key,tempTime));
     }
   } else {
     std::cout << "Unknown type" << std::endl;
     return false;
-    // abort();
   }
   std::cout << "addKeySpace has been Executed" << std::endl;
   return true;
 }
 bool DataBase::delKeySpace(int type, const std::string &key) {
   if (type == DataStructure::ObjString) {
-    std::map<std::pair<std::string, long long>, std::string>::iterator it =
-        String_.begin();
-    while (it != String_.end()) {
-      if (it->first.first == key) {
-        break;
-      } else
-        it++;
-    }
-    if (it == String_.end())
-      std::cout << "Not Found" << std::endl;
-    else {
-      String_.erase(it);
-      return true;
+    SMap ::iterator hIter = sMap_.find(key);
+    if(hIter != sMap_.end()) {
+        String_.erase({key,sMap_[key]});
+        return true;
+    } else {
+        cout << "Not Found " << endl;
     }
   } else if (type == DataStructure::ObjHash) {
-    std::map<std::pair<std::string, long long>,
-             std::multimap<std::string, std::string>>::iterator it =
-        Hash_.begin();
-    while (it != Hash_.end()) {
-      if (it->first.first == key)
-        break;
-      else {
-        it++;
-      }
-    }
-    if (it == Hash_.end()) {
-      std::cout << "Not Found" << std::endl;
-      abort();
-    } else {
-      Hash_.erase(it);
-      return true;
+    HMap::iterator hIter = hMap_.find(key);
+    if(hIter != hMap_.end()) {
+        Hash_.erase({key,hMap_[key]});
+        return true;
     }
   } else if (type == DataStructure::ObjList) {
-    std::map<std::pair<std::string, long long>,
-             std::list<std::string>>::iterator it = List_.begin();
-    while (it != List_.end()) {
-      if (it->first.first == key)
-        break;
-      else {
-        it++;
-      }
-    }
-    if (it == List_.end()) {
-      std::cout << "Not Found" << std::endl;
-      abort();
-    } else {
-      List_.erase(it);
-      return true;
+    LMap::iterator lIter = lMap_.find(key);
+    if(lIter != lMap_.end()) {
+        List_.erase({key,lMap_[key]});
+        return true;
     }
   } else {
     std::cout << "Unknown type" << std::endl;
@@ -189,76 +101,82 @@ bool DataBase::delKeySpace(int type, const std::string &key) {
   return false;
 }
 const std::string DataBase::delListObject(const std::string &key) {
-  auto it = FindList(key);
-  std::string res = it->second.back();
-  it->second.pop_back();
-  return res;
+    auto lIter = lMap_.find(key);
+    if(lIter != lMap_.end()) {
+        auto it = List_.find({key,lIter->second});
+        std::string res = it->second.back();
+        it->second.pop_back();
+        return res;
+    } else {
+        return Status::NotFound("Not Found key").ToString();
+    }
+
 }
 std::string DataBase::getKeySpace(int type, const std::string &key) {
   std::string ret = std::string();
   if (!judgeKeySpaceExpiresTime(type, key)) {
     if (type == DataStructure::ObjString) {
-      std::map<std::pair<std::string, long long>, std::string>::iterator it =
-          String_.begin();
-      while (it != String_.end()) {
-        if (it->first.first == key) {
-          break;
-        } else
-          it++;
-      }
-      if (it == String_.end()) ret = Status::NotFound("Not Found").ToString();
-      else
-        ret = it->second;
+       SMap::iterator sIter = sMap_.find(key);
+       if(sIter == sMap_.end()) {
+           ret = Status::NotFound("Not Found").ToString();
+       } else {
+           auto it = String_.find({key,sIter->second});
+           ret = '+' + it->second;
+       }
+
     } else if (type == DataStructure::ObjHash) {
-      std::map<std::pair<std::string, long long>,
-               std::multimap<std::string, std::string>>::iterator it =
-          Hash_.begin();
-      while (it != Hash_.end()) {
-        if (it->first.first == key)
-          break;
-        else {
-          it++;
+        HMap::iterator hIter = hMap_.find(key);
+        if(hIter == hMap_.end()) {
+            std::cout << "Not Found" << std::endl;
+            ret = Status::NotFound("Not Found").ToString();
+        } else {
+            char buf[1024] = {0};
+            char* pbuf = buf;
+            auto it = Hash_.find({key,hIter->second});
+            int n = 0,len = 0;
+            multimap<string,string>::iterator iter;
+            for(auto iter = it->second.begin(); iter != it->second.end();
+                                    iter = it->second.upper_bound(iter->first))
+            {
+                pair<multimap<string,string>::iterator,multimap<string,string>::iterator>
+                                        pos = it->second.equal_range(iter->first);
+                for(auto i = pos.first; i != pos.second; i++ ) {
+                    std::cout << "test " << i->first << ": " << i->second << std::endl;
+                    n = snprintf(pbuf+n,sizeof(buf)-len,"%s %s ",i->first.c_str(),i->second.c_str());
+                    len += n;
+                }
+            }
+//            while(iter != it->second.begin()) {
+//                if(tmpcount--)
+//                    iter = --it->second.end();
+//                else iter--;
+//                int count = it->second.count(iter->first);
+//                auto miter = it->second.find(iter->first);
+//                while(count) {
+//                    std::cout << "test " << miter->first << ": " << miter->second << std::endl;
+//                    n = snprintf(pbuf+n,sizeof(buf)-len,"%s %s ",miter->first.c_str(),miter->second.c_str());
+//                    len += n;
+//                    count--;
+//                    miter++;
+//                }
+//            }
+            ret = buf;
+            string t = "+";
+            ret = t + ret;
+            cout << ret << endl;
         }
-      }
-      if (it == Hash_.end()) {
-        std::cout << "Not Found" << std::endl;
-        ret = Status::NotFound("Not Found").ToString();
-      } else {
-        std::multimap<std::string, std::string> tmp = it->second;
-        char buf[1024] = {0};
-        char * pbuf = buf;
-        std::cout << "test" << std::endl;
-        int n = 0, len = 0; 
-        std::multimap<std::string, std::string>::iterator iter = it->second.begin();
-        while(iter != it->second.end()) {
-          auto pos = tmp.equal_range(iter->first);
-          while (pos.first != pos.second) {
-            std::cout << "test " << pos.first->first << ": " << pos.first->second << std::endl;
-            n = snprintf(pbuf+len,sizeof(buf)-len,"%s %s ",pos.first->first.c_str(),pos.first->second.c_str());
-            len += n;
-            pos.first++;
-            iter++;
-          }
-        }
-        ret = buf;
-      }
+
     } else if (type == DataStructure::ObjList) {
-      std::map<std::pair<std::string, long long>,
-               std::list<std::string>>::iterator it = List_.begin();
-      while (it != List_.end()) {
-        if (it->first.first == key)
-          break;
-        else {
-          it++;
+        LMap::iterator lIter = lMap_.find(key);
+        if(lIter == lMap_.end()) {
+            std::cout << "Not Found" << std::endl;
+            ret = Status::NotFound("Not Found").ToString();
+        } else {
+            auto it = List_.find({key,lIter->second});
+            std::list<std::string>::iterator iter = it->second.begin();
+            ret = '+' + *iter;
         }
-      }
-      if (it == List_.end()) {
-        std::cout << "Not Found" << std::endl;
-        ret = Status::NotFound("Not Found").ToString();
-      } else {
-        std::list<std::string>::iterator iter = it->second.begin();
-        ret = *iter;
-      }
+
     } else {
       std::cout << "Unknown Type" << std::endl;
       ret = Status::InvalidArgument("InvaildArgument").ToString();
@@ -267,52 +185,24 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
     delKeySpace(type, key);
     ret = "The key has expired and has been deleted";
   }
-  //   std::cout << "getKeySpace: " << ret << std::endl;
   return ret;
 }
 
 long long DataBase::getKeySpaceExpiresTime(int type, const std::string &key) {
   long long ret;
   if (type == DataStructure::ObjString) {
-    std::map<std::pair<std::string, long long>, std::string>::iterator it =
-        String_.begin();
-    while (it != String_.end()) {
-      if (it->first.first == key)
-        break;
-      else
-        it++;
-    }
-    if (it == String_.end()) {
-      ret = -2;
-    } else
-      ret = it->first.second;
+      auto it = sMap_.find(key);
+      if(it == sMap_.end()) return -1;
+      else ret = it->second;
   } else if (type == DataStructure::ObjHash) {
-    std::map<std::pair<std::string, long long>,
-             std::multimap<std::string, std::string>>::iterator it =
-        Hash_.begin();
-    while (it != Hash_.end()) {
-      if (it->first.first == key)
-        break;
-      else
-        it++;
-    }
-    if (it == Hash_.end())
-      ret = -2;
-    else
-      ret = it->first.second;
-  } else if (type == DataStructure::ObjList) {
-    std::map<std::pair<std::string, long long>,
-             std::list<std::string>>::iterator it = List_.begin();
-    while (it != List_.end()) {
-      if (it->first.first == key)
-        break;
-      else
-        it++;
-    }
-    if (it == List_.end())
-      ret = -2;
-    else
-      ret = it->first.second;
+      auto it = hMap_.find(key);
+      if (it == hMap_.end()) return -3;
+      else ret = it->second;
+  }
+  else if (type == DataStructure::ObjList) {
+      auto it = lMap_.find(key);
+      if(it == lMap_.end()) ret = -2;
+      else ret =  it->second;
   } else {
     ret = -3;
   }

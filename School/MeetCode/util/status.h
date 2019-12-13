@@ -14,7 +14,7 @@ namespace _Redis {
                 str_ = "";
             }
             Status(int status,const string msg){
-                status = status;
+                status_ = status;
                 str_ = msg;
             }
 //            Status& operator= (const Status rhs) {

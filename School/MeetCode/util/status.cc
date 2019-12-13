@@ -3,7 +3,7 @@
 namespace _Redis {
 
 std::string Status::ToString() {
-    if(str_== "") {
+    if(str_== "" && str_ == "") {
         return "+Ok\r\n";
     }
     else {

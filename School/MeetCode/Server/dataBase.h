@@ -1,5 +1,9 @@
+#include <unordered_map>
+
 #include "model.h"
 #include "../util/status.h"
+
+using namespace std;
 using namespace _Redis;
 
 class DataBase {
@@ -10,10 +14,8 @@ class DataBase {
  public:
   typedef std::map<std::pair<std::string, long long>, std::string> String;
   typedef std::map<std::pair<std::string, long long>,
-                   std::multimap<std::string, std::string>>
-      Hash;
-  typedef std::map<std::pair<std::string, long long>, std::list<std::string>>
-      List;
+                                std::multimap<std::string, std::string>> Hash;
+  typedef std::map<std::pair<std::string, long long>, std::list<std::string>> List;
   const long long DefaultTime = -2038;
   void rdbLoad();
   bool addKeySpace(int type, int encoding, const std::string &key,
@@ -82,5 +84,10 @@ class DataBase {
   Hash Hash_;
   List List_;
 private:
-  
+  typedef unordered_map<string, long long> SMap;
+  typedef unordered_map<string, long long> HMap;
+  typedef unordered_map<string, long long> LMap;
+  SMap  sMap_;
+  HMap  hMap_;
+  LMap  lMap_;
 };
