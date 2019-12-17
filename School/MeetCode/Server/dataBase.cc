@@ -134,15 +134,14 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
             char* pbuf = buf;
             auto it = Hash_.find({key,hIter->second});
             int n = 0,len = 0;
-            multimap<string,string>::iterator iter;
             for(auto iter = it->second.begin(); iter != it->second.end();
                                     iter = it->second.upper_bound(iter->first))
             {
-                pair<multimap<string,string>::iterator,multimap<string,string>::iterator>
-                                        pos = it->second.equal_range(iter->first);
+                auto pos = it->second.equal_range(iter->first);
                 for(auto i = pos.first; i != pos.second; i++ ) {
                     std::cout << "test " << i->first << ": " << i->second << std::endl;
-                    n = snprintf(pbuf+n,sizeof(buf)-len,"%s %s ",i->first.c_str(),i->second.c_str());
+                    n = snprintf(pbuf,sizeof(buf)-len,"%s %s ",i->first.c_str(),i->second.c_str());
+                    pbuf += n;
                     len += n;
                 }
             }

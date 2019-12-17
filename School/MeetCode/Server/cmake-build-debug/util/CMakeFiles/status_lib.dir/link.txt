@@ -1,0 +1,2 @@
+/usr/bin/ar qc libstatus_lib.a  CMakeFiles/status_lib.dir/status.cc.o
+/usr/bin/ranlib libstatus_lib.a

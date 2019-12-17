@@ -1,0 +1,6 @@
+/home/insect/code/MeetingCode/Database/Server/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/insect/code/MeetingCode/Database/Server/cmake-build-debug/CMakeFiles/Demo.dir
+/home/insect/code/MeetingCode/Database/Server/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/insect/code/MeetingCode/Database/Server/cmake-build-debug/util/CMakeFiles/rebuild_cache.dir
+/home/insect/code/MeetingCode/Database/Server/cmake-build-debug/util/CMakeFiles/status_lib.dir
+/home/insect/code/MeetingCode/Database/Server/cmake-build-debug/util/CMakeFiles/edit_cache.dir

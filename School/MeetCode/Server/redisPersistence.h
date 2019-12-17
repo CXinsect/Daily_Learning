@@ -2,6 +2,8 @@
 #define _PERSISTENCE_H_
 #include "model.h"
 #include "dataBase.cc"
+#include "./util/status.h"
+using namespace std;
 
 class Persistence {
     public:
@@ -11,15 +13,20 @@ class Persistence {
         void childHandle(int sig);
         void rdbSave();
         bool CheckStorageConditions();
-        void setDataBase(DataBase &database) {
-
-        }
+        void setDataBase(DataBase &database) {}
     private:
          long long  getTimestamp() {
             struct timeval tv;
             assert(gettimeofday(&tv,NULL) != -1);
             return tv.tv_sec;
         }
+        //modify persistense
+    public:
+        string saveBackGround();
+        bool rdbSave(const string& filename);
+
+
+
     public:
         typedef std::map<std::pair<std::string, long long>,std::string>::iterator StringIterator_;
         typedef std::map<std::pair<std::string,long long>, std::multimap<std::string, std::string>>::iterator HashIterator_;

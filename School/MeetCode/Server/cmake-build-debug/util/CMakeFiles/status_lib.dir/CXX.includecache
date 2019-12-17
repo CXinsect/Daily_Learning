@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/insect/code/MeetingCode/Database/Server/util/status.cc
+status.h
+/home/insect/code/MeetingCode/Database/Server/util/status.h
+
+/home/insect/code/MeetingCode/Database/Server/util/status.h
+string
+-
+cstring
+-
+

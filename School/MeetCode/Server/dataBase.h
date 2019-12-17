@@ -1,7 +1,7 @@
 #include <unordered_map>
 
 #include "model.h"
-#include "../util/status.h"
+#include "./util/status.h"
 
 using namespace std;
 using namespace _Redis;
