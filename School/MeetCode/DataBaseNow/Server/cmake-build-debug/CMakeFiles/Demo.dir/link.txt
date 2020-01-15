@@ -1,0 +1,1 @@
+/usr/bin/g++  -g   CMakeFiles/Demo.dir/redis.cc.o  -o Demo util/libstatus_lib.a 
