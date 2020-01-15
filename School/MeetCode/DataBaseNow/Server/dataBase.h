@@ -2,6 +2,7 @@
 
 #include "model.h"
 #include "./util/status.h"
+#include "LRU.h"
 
 using namespace std;
 using namespace _Redis;
@@ -9,12 +10,15 @@ using namespace _Redis;
 class DataBase {
  public:
   DataBase(){};
-  DataBase(int db_num) : db_num_(db_num) { }
+  DataBase(int db_num) : db_num_(db_num) {
+    LRUCache<string > stringLru_(1000);
+    LRUCache<string > hashLru_(1000);
+    LRUCache<string > listLRu_(1000);
+  }
 
  public:
   typedef std::map<std::pair<std::string, long long>, std::string> String;
-  typedef std::map<std::pair<std::string, long long>,
-                                std::multimap<std::string, std::string>> Hash;
+  typedef std::map<std::pair<std::string, long long>, std::multimap<std::string, std::string>> Hash;
   typedef std::map<std::pair<std::string, long long>, std::list<std::string>> List;
   const long long DefaultTime = -2038;
   void rdbLoad();
@@ -24,12 +28,7 @@ class DataBase {
   bool delKeySpace(int type, const std::string &key);
   const std::string delListObject(const std::string &key);
   std::string getKeySpace(int type, const std::string &key);
-  // void setKeySpaceStringExpiresTime(const String::iterator &it,long long expiresTime) {
-  //   if (expiresTime != DefaultTime)  {
-  //     tmp = expiresTime + getTimestamp();
-  //   }
-  // };
-  // bool setKeySpaceTime(int type, long long expireTime);
+ 
   long long getKeySpaceExpiresTime(int type, const std::string &key);
   bool judgeKeySpaceExpiresTime(int type, const std::string &key);
   void deleteKeySpaceExpireTime(int type, const std::string &key);
@@ -50,14 +49,6 @@ class DataBase {
     return tv.tv_sec;
   }
 
-  inline std::map<std::pair<std::string, long long>, std::string>::iterator
-  FindString(const std::string &key);
-  inline std::map<std::pair<std::string, long long>,
-                  std::multimap<std::string, std::string>>::iterator
-  FindHash(const std::string &key);
-  inline std::map<std::pair<std::string, long long>,
-                  std::list<std::string>>::iterator
-  FindList(const std::string &);
   inline std::string InterceptString(const std::string ptr, int pos1,
                                      int pos2) {
     if (pos1 > pos2) std::swap(pos1, pos2);

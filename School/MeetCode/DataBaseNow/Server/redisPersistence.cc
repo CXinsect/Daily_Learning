@@ -51,17 +51,21 @@ void Persistence::rdbSave () {
         std::string tmp = getcwd(buf,sizeof(buf));
         assert(tmp.c_str() != NULL);
         tmp += "/1.rdb";
-        std::cout << "tmp: The File Path: " << tmp << std::endl;
+        std::cout << "tmp: The File Path: ddd" << tmp << std::endl;
         std::ofstream out;
         //首先打开文件
         out.open(tmp,std::ios::app | std::ios::out);
+        if(out.is_open()) cout << "error" << endl;
+        
         for(int i = 0; i < dbNums_;i++) {
             //如果字符串对象不为空便开始写入过程
             if(database_->getKeySpaceStringObject().size() != 0) {
                 //首先判断字符串对象，实现对字符串对象的保存。
+               
                 StringIterator_ it = database_->getKeySpaceStringObject().begin();
                 while(it != database_->getKeySpaceStringObject().end()) {
-                    snprintf(buf,sizeof(buf),"%s%s%ld%s%lld^%hd!%d@%s!%d$%s%d%ld\r\n",FixedStructure.c_str(),Database.c_str(),i,
+                    cout << "write hhhhhhhhhhhh" << endl;
+                    snprintf(buf,sizeof(buf),"%s%s%d%s%lld^%hd!%d@%s!%d$%s%d%ld\r\n",FixedStructure.c_str(),Database.c_str(),i,
                              ExpireTime.c_str(),it->first.second,RedisRdbTypeString,(int)it->first.first.size(),
                              it->first.first.c_str(),(int)it->second.size(),it->second.c_str(),Eof,CheckSum);
                     std::cout << "Rdb Structure String: " << buf << std::endl;
@@ -118,9 +122,10 @@ void Persistence::rdbSave () {
                     it++;
                 }
             }
-            exit(0);
+           
+            // exit(0);
         }
-
+         out.close();
         cout << "Finished" << endl;
          return;
     }

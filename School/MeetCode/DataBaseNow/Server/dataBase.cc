@@ -1,4 +1,6 @@
 #include "dataBase.h"
+#include "File.h"
+#include "LRU.h"
 
 bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
                            const std::string &value, const std::string &value1,
@@ -233,25 +235,30 @@ void DataBase::rdbLoad() {
   struct stat stat_;
   int ret = ::stat(path.c_str(), &stat_);
   if(ret < 0) {
-    std::cout << "Rdb file does not exist" << std::endl;
-    return;
+    cout << strerror(errno) << endl;
   }
+  MmapFile mfile(static_cast<int>(stat_.st_size),path);
+  
+  mfile.MmapOpen();
   std::ifstream in;
-  in.open(path, std::ios::in);
-  // if opening is successful
-  if (in.is_open()) {
-    while (!in.eof()) {
-      in.read(buf, sizeof(buf));
-    }
-    std::cout << "data in buffer: " << buf << std::endl;
-  }
-  in.close();
-  std::string data = buf;
-  std::cout << "data: " << data.size() << std::endl;
+  // in.open(path, std::ios::in);
+  //if opening is successful
+  // if (in.is_open()) {
+  //   while (!in.eof()) {
+  //     in.read(buf, sizeof(buf));
+  //   }
+  //   std::cout << "data in buffer: " << buf << std::endl;
+  // }
+  // in.close();
+  
+  std::string data(mfile.getFilePtr(),mfile.getFilePtr()+ mfile.getFileSize());
+  // string data = buf;
+  std::cout << "data: " << data << data.size() << std::endl;
   int pos;
   while (data.size()) {
-    ret = data.find("DATABASE");
-    pos = data.find("EXPIRETIME");
+    ret = data.find("FE");
+    pos = data.find("FD");
+    cout << pos << ret << endl;
     db_num_ = atoi(InterceptString(data, ret + 8, pos).c_str());
     ret = data.find_first_of('^');
     long long expiresTime_ = atoi(InterceptString(data, pos + 10, ret).c_str());
@@ -271,7 +278,7 @@ void DataBase::rdbLoad() {
       pos = data.find_first_of('\n');
       ret = data.find('\n', pos + 1);
       int len = InterceptString(data, pos + 1, ret + 1).size();
-      data = data.substr(pos + 1, data.size());
+      data = data.substr(pos + 1, 94);
       continue;
     }
     if (type_ == DataStructure::ObjHash) {
