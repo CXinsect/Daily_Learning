@@ -1,7 +1,7 @@
 #include "../Server/LRU.h"
 
 int main (void) {
-    LRUCache<int> l(5);
+    LRUCache<int,int> l(5);
     l.set(1,1);
     l.set(2,2);
     l.set(3,3);

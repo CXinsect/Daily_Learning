@@ -6,24 +6,30 @@
 #include <memory>
 
 using namespace std;
-template <typename T>
+template <typename T1,typename T2>
 struct LinkedNode {
-    T key;
-    T value;
-    LinkedNode<T>* pre;
-    LinkedNode<T>* next;
+    T1 key;
+    T2 value;
+    LinkedNode<T1,T2>* pre;
+    LinkedNode<T1,T2>* next;
 };
 
-template <typename T>
+template <typename T1,typename T2>
 class LRUCache {
     public:
-        LRUCache (int cap) : count(0),capicaty(cap),head(NULL),tail(NULL){
-            head = new LinkedNode<T>;
-            tail = new LinkedNode<T>;
+        LRUCache() : capicaty(1000) {
+            head = new LinkedNode<T1,T2>;
+            tail = new LinkedNode<T1,T2>;
             head->next = tail;
             tail->pre = head;
         }
-        int get (T key) {
+        LRUCache (int cap) : count(0),capicaty(cap),head(NULL),tail(NULL){
+            head = new LinkedNode<T1,T2>;
+            tail = new LinkedNode<T1,T2>;
+            head->next = tail;
+            tail->pre = head;
+        }
+        int get (T1 key) {
             auto ret = cache.find(key);
             if(ret == cache.end()) {
                 return -1;
@@ -33,18 +39,18 @@ class LRUCache {
             }
         }
 
-        void set (T key,T value) {
+        void set (T1 key,T2 value) {
             auto ret = cache.find(key);
 
             if(ret == cache.end()) {
-                LinkedNode<T>* newNode(new LinkedNode<T>);
+                LinkedNode<T1,T2>* newNode(new LinkedNode<T1,T2>);
                 newNode->key = key;
                 newNode->value = value;
                 cache.insert(make_pair(key,*newNode));
                 addNode(newNode);
                 count++;
                 if(count > capicaty) {
-                    LinkedNode<T> tail = popTail();
+                    LinkedNode<T1,T2> tail = popTail();
                     cache.erase(tail.key);
                     count--;
                 }
@@ -62,14 +68,14 @@ class LRUCache {
         //     }
         // }
     private:
-        void addNode(LinkedNode<T>* node) {
+        void addNode(LinkedNode<T1,T2>* node) {
             node->pre = head;
             node->next = head->next;
             head->next->pre = node;
             head->next = node;
         }
 
-        void removeNode(LinkedNode<T>* node) {
+        void removeNode(LinkedNode<T1,T2>* node) {
             // LinkedNode<T>* pre = node->pre;
             // LinkedNode<T>* next = node->next;
             // pre->next = next;
@@ -77,23 +83,25 @@ class LRUCache {
             node->pre->next = node->next;
             node->next->pre = node->pre;
         }
-        void moveToHead(LinkedNode<T>* node) {
+        void moveToHead(LinkedNode<T1,T2>* node) {
             if(node != NULL) {
                 removeNode(node);
                 addNode(node);
             }
         }
 
-        LinkedNode<T> popTail() {
-            LinkedNode<T> res = *tail->pre;
+        LinkedNode<T1,T2> popTail() {
+            LinkedNode<T1,T2> res = *tail->pre;
             removeNode(&res);
             return res;
         }
+
+        
     private:
-        unordered_map<T,LinkedNode<T> > cache;
+        unordered_map<T1,LinkedNode<T1,T2> > cache;
         int count;
         int capicaty;
-        LinkedNode<T>*head, *tail;
+        LinkedNode<T1,T2>*head, *tail;
 
 };
 

@@ -1,6 +1,6 @@
 #include "dataBase.h"
 #include "File.h"
-#include "LRU.h"
+// #include "LRU.h"
 
 bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
                            const std::string &value, const std::string &value1,
@@ -16,11 +16,13 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       if(Siter == sMap_.end()) {
           String_.insert(make_pair(make_pair(key,tempTime), value_));
           sMap_.insert(make_pair(key,tempTime));
+          stringLru_.set(key,value);
       } else {
           String_.erase({key,sMap_[key]});
           sMap_.erase(key);
           sMap_.insert(make_pair(key,tempTime));
           String_.insert(make_pair(make_pair(key_,tempTime),value_));
+          stringLru_.set(key,value);
       }
   } else if (type == DataStructure::ObjHash) {
       HMap::iterator Hiter = hMap_.find(key);
@@ -29,6 +31,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
           tmp.insert(make_pair(value_, value1_));
           Hash_.insert(make_pair(make_pair(key_, tempTime), tmp));
           hMap_.insert(make_pair(key,tempTime));
+          hashLru_.set(key,tmp);
       } else {
           std::multimap<std::string, std::string> tmp;
           Hash::iterator it = Hash_.find({key,hMap_[key]});
@@ -43,6 +46,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
           hMap_.erase(key);
           Hash_.insert(make_pair(make_pair(key,tempTime),tmp));
           hMap_.insert(make_pair(key,tempTime));
+          hashLru_.set(key,tmp);
       }
   } else if (type == DataStructure::ObjList) {
 
@@ -52,6 +56,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
           tmp.push_back(value_);
           List_.insert(make_pair(make_pair(key_,tempTime), tmp));
           lMap_.insert(make_pair(key,tempTime));
+          listLRu_.set(key,tmp);
       } else {
           //更新list的值
           auto it = List_.find({key,lIter->second});
@@ -67,6 +72,7 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
           std::cout << "ListObject size: " << tmp.size() << std::endl;
           List_.insert(make_pair(make_pair(key_,tempTime),tmp));
           lMap_.insert(make_pair(key,tempTime));
+          listLRu_.set(key,tmp);
     }
   } else {
     std::cout << "Unknown type" << std::endl;

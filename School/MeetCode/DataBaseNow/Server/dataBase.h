@@ -11,9 +11,7 @@ class DataBase {
  public:
   DataBase(){};
   DataBase(int db_num) : db_num_(db_num) {
-    LRUCache<string > stringLru_(1000);
-    LRUCache<string > hashLru_(1000);
-    LRUCache<string > listLRu_(1000);
+    
   }
 
  public:
@@ -78,7 +76,12 @@ private:
   typedef unordered_map<string, long long> SMap;
   typedef unordered_map<string, long long> HMap;
   typedef unordered_map<string, long long> LMap;
+
   SMap  sMap_;
   HMap  hMap_;
   LMap  lMap_;
+
+  LRUCache<string, string> stringLru_;
+  LRUCache<string, multimap<string,string> > hashLru_;
+  LRUCache<string, list<string> > listLRu_;
 };
