@@ -5,8 +5,8 @@
 class Epoll {
     public:
         typedef std::vector<class Channel*> ChannelList;
-        Epoll() {  }
-        ~Epoll() = default;
+        Epoll()=default;
+        ~Epoll() {} ;
         void setEpollfd(int epollfd) { epollfd_ = epollfd; }
         void epoll(ChannelList *activeChannel);
         void fillActiveChannel(int numEvents, ChannelList* activeChanel);

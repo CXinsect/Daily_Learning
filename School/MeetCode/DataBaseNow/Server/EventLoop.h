@@ -2,7 +2,8 @@
 #define _EVENTLOOP_H_
 #include "model.h"
 
-#include "Epoll.cc"
+#include "Epoll.h"
+
 
 class EventLoop {
     public:

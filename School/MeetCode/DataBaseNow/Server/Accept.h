@@ -1,13 +1,16 @@
 #ifndef _ACCEPT_H_
 #define _ACCEPT_H_
 #include "model.h"
-#include "EventLoop.h"
+#include "SocketOpts.h"
+#include "InetAddress.h"
+#include "Socket.h"
+#include "Buffer.h"
 #include "Channel.h"
-#include "Socket.cc"
-#include "Buffer.cc"
-// #include "SocketOpts.cc"
-// #include "InetAddress.h"
+
+
 class InetAddr;
+// class Channel;
+class EventLoop;
 
 class Accept : public std::enable_shared_from_this<Accept>{
     public:

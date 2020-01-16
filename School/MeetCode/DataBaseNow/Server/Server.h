@@ -1,11 +1,10 @@
 #ifndef _SERVER_H_
 #define _SERVER_H_
 
-#include "EventLoop.cc"
-#include "Channel.cc"
-#include "Accept.cc"
+#include "Accept.h"
+#include "EventLoop.h"
 // #include "dataBase.cc"
-#include "redisPersistence.cc"
+#include "redisPersistence.h"
 
 #include "./util/status.h"
 

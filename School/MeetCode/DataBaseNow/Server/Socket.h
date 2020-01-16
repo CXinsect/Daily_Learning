@@ -2,6 +2,7 @@
 #define SOCKET__H__
 #include "model.h"
 using namespace std;
+
 class Address;
 
 class Socket {

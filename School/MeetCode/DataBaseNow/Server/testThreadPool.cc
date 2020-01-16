@@ -2,24 +2,23 @@
 
 struct A : public Task {
     public:
-        A() : a(0) {}
+        A(int d) : a(0) {}
         ~A() {}
-        void Run() override
-         {
-            for(int i = 0;i < 10000;i++) 
-                a++;
-            cout << a << endl;
+        void Run() override {
+            print();
         }
-        // void print() { cout << a << endl; }
+        void print();
     private:
         int a;
 };
-
+void A::print() {
+    cout << a << endl;
+}
 int main (void) {
     ThreadPool* t = new ThreadPool(8);
     t->Start();
     for(int i = 0;i <8;i++)
-        t->addTask(new A());
+        t->addTask(new A(1));
     
   
     t->Stop();

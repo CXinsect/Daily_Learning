@@ -1,6 +1,6 @@
 #include "InetAddress.h"
 #include "model.h"
-#include "SocketOpts.cc"
+#include "SocketOpts.h"
 static const in_addr_t InaddrAny = INADDR_ANY;
 static const in_addr_t InaddrLoopback = INADDR_LOOPBACK;
 

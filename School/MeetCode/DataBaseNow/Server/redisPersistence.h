@@ -1,10 +1,89 @@
 #ifndef _PERSISTENCE_H_
 #define _PERSISTENCE_H_
 #include "model.h"
-#include "dataBase.cc"
+#include "dataBase.h"
 #include "./util/status.h"
+#include "threadpool.h"
+#include <mutex>
+#include <atomic>
+#include "File.h"
+#include <algorithm>
+
 using namespace std;
 
+class threadStorage : public Task {
+    public:
+       
+        threadStorage(shared_ptr<DataBase>&db,int dbNum):database_(db),fileId_(0),dbNums_(dbNum) {
+         }
+         ~threadStorage() {}
+        void rdbSave();
+        void Run() { CheckStorageConditions(); }
+        void print(); 
+        void setDataBase(shared_ptr<DataBase>& db) {
+            database_ = db;
+        }
+    private:
+        int incrementFileId (int inc) {
+            fileId_ += inc;
+            return fileId_;
+        }
+        int getCurFileId() { return fileId_; }
+        
+        string intToString (int t) {
+            string s = "";
+            while(t) {
+                s += '0' + t % 10;
+                t /= 10;
+            }
+            reverse(s.begin(),s.end());
+            return s;
+        }
+    public:
+        bool CheckStorageConditions();
+        // void setDataBase(DataBase &database) {}
+        
+    private:
+         long long  getTimestamp() {
+             struct timeval tv;
+             assert(gettimeofday(&tv, NULL) != -1);
+             return tv.tv_sec;
+         }
+    private:
+        atomic<int> fileId_;
+        mutex mutex_;   
+        shared_ptr<DataBase> database_;
+    private:
+        public:
+        //Rdb的数据结构
+        const std::string Redis = "REDIS";
+        const std::string Version = "0004";
+        const std::string Database = "FE";
+        const std::string ExpireTime = "FD";
+        const int Eof = 377;
+        const short RedisRdbTypeString = 0;
+        const short RedisRdbTypeHash = 1;
+        const short RedisRdbTypeList = 2;
+        long CheckSum;
+
+
+    private:
+        std::string rdb_;
+        long long dirty_;
+        long long lastsave_ = 0;
+        //记录成员大小
+        long ListSize_;
+        long HashSize_;
+        long  databaseNum_;
+        //rdb的结构
+        std::string FixedStructure = Redis+Version;
+        const char k = '#';
+        const char k1 = '@';
+        //hash key
+        const char v = '$';
+    public:
+        int dbNums_;
+};
 class Persistence {
     public:
         Persistence() {}
@@ -14,6 +93,8 @@ class Persistence {
         void rdbSave();
         bool CheckStorageConditions();
         void setDataBase(DataBase &database) {}
+    public:
+        
     private:
          long long  getTimestamp() {
              struct timeval tv;
@@ -21,10 +102,10 @@ class Persistence {
              return tv.tv_sec;
          }
 
-    public:
-        typedef std::map<std::pair<std::string, long long>,std::string>::iterator StringIterator_;
-        typedef std::map<std::pair<std::string,long long>, std::multimap<std::string, std::string>>::iterator HashIterator_;
-        typedef std::map<std::pair<std::string, long long>, std::list<std::string>>::iterator ListIteator_; 
+    // public:
+    //     typedef std::map<std::pair<std::string, long long>,std::string>::iterator StringIterator_;
+    //     typedef std::map<std::pair<std::string,long long>, std::multimap<std::string, std::string>>::iterator HashIterator_;
+    //     typedef std::map<std::pair<std::string, long long>, std::list<std::string>>::iterator ListIteator_; 
     public:
         //Rdb的数据结构
         const std::string Redis = "REDIS";
@@ -58,5 +139,6 @@ class Persistence {
         const char v = '$';
     public:
         int dbNums_;
+    
 };
 #endif

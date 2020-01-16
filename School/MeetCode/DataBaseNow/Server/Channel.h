@@ -2,8 +2,8 @@
 #define _CHANNEL_H_
 
 #include "model.h"
-// #include "EventLoop.h"
 class EventLoop;
+
 class Channel {
     public:
         Channel() {}
@@ -48,7 +48,4 @@ class Channel {
         EventCallBack sreadcallback_;
         EventCallBack writecallback_;
 };
-const int Channel::NoneEvent_ = 0;
-const int Channel::ReadEvent_ = EPOLLIN | EPOLLPRI;
-const int Channel::WriteEvent_ = EPOLLOUT;
 #endif

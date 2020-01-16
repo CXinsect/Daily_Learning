@@ -6,16 +6,16 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
-
+#include <memory>
 using namespace std;
 
+// template <typename T>
 struct Task {
     public:
         Task() {}
-        virtual ~Task() =default;
+        ~Task() {}
         virtual void Run ()=0;
 };
-
 class ThreadPool {
     public:
         ThreadPool (int nums) : numThreads_ (nums), stoped_(false) {}
@@ -53,7 +53,7 @@ class ThreadPool {
             cond_.notify_all();
             for(auto &i:thread_) i.join();
             while(!queue_.empty()) {
-                this_thread::sleep_for(chrono::milliseconds(5000));
+                this_thread::sleep_for(chrono::milliseconds(500s));
             }
             unique_lock<mutex> mylock(mutex_);
             while(!queue_.empty()) {

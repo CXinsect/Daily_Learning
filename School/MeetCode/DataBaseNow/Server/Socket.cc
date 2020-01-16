@@ -1,6 +1,7 @@
 #include "Socket.h"
-#include "InetAddress.cc"
-// #include "SocketOpts.cc"
+#include "InetAddress.h"
+
+#include "SocketOpts.h"
 Socket::~Socket() { ::close(sockfd); }
 
 void Socket::bindAddress(const Address &addr) {
