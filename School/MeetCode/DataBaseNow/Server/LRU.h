@@ -29,16 +29,13 @@ class LRUCache {
             head->next = tail;
             tail->pre = head;
         }
-        string get (T1 key) {
+        int get(T1 key) {
             auto ret = cache.find(key);
-            if(ret == cache.end()) {
-                return "";
-            } else {
-                moveToHead(&ret->second);
-                return ret->second.value;
-            }
+            if(ret != cache.end()) {
+                moveToHead(ret->second);
+                return ret->second->value;
+            } else return 0;
         }
-
         void set (T1 key,T2 value) {
             auto ret = cache.find(key);
 
@@ -46,7 +43,7 @@ class LRUCache {
                 LinkedNode<T1,T2>* newNode(new LinkedNode<T1,T2>);
                 newNode->key = key;
                 newNode->value = value;
-                cache.insert(make_pair(key,*newNode));
+                cache.insert(make_pair(key,newNode));
                 addNode(newNode);
                 count++;
                 if(count > capicaty) {
@@ -55,8 +52,8 @@ class LRUCache {
                     count--;
                 }
             } else {
-                ret->second.value = value;
-                moveToHead(&ret->second);
+                ret->second->value = value;
+                moveToHead(ret->second);
             }
         }
         int getCount() { return count; }
@@ -91,14 +88,14 @@ class LRUCache {
         }
 
         LinkedNode<T1,T2> popTail() {
-            LinkedNode<T1,T2> res = *tail->pre;
-            removeNode(&res);
-            return res;
+            LinkedNode<T1,T2>* res = tail->pre;
+            removeNode(res);
+            return *res;
         }
 
         
     private:
-        unordered_map<T1,LinkedNode<T1,T2> > cache;
+        unordered_map<T1,LinkedNode<T1,T2>* > cache;
         int count;
         int capicaty;
         LinkedNode<T1,T2>*head, *tail;

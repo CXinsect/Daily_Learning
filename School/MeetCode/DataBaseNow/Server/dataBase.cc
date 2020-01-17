@@ -164,21 +164,9 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
   {
     if (type == DataStructure::ObjString)
     {
-      string lruret = stringLru_.get(key);
-      if (lruret != "")
-      {
-        return lruret;
-      }
-      else
-      {
         SMap::iterator sIter = sMap_.find(key);
         if (sIter == sMap_.end())
         {
-          auto ptr = shared_ptr<redisPersistence>();
-          if(storage_.lock()) {
-            auto ptr = storage_.lock();
-            string fstr;
-          }
           ret = Status::NotFound("Not Found").ToString();
         }
         else
@@ -186,7 +174,6 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
           auto it = String_.find({key, sIter->second});
           ret = '+' + it->second;
         }
-      }
     }
     else if (type == DataStructure::ObjHash)
     {

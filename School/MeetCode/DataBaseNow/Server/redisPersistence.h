@@ -63,14 +63,14 @@ class threadStorage : public Task {
     private:
         // int fileId_;
         mutex mutex_;   
-        int offsetend_;
+        int offsetend_ = 0;
         uint64_t location_;
         shared_ptr<DataBase> database_;
         unordered_map<string,uint64_t> keyLocation_;
         unordered_map<string,string> keyPath_;
         bool hasFileFlag_ = false;
         int fd_ = -1;
-        int tmp = 0;
+        char* mptr_;
         
     public:
         string findFileEntries(string key) {

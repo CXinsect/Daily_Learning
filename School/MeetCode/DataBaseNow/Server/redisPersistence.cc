@@ -151,7 +151,6 @@ void threadStorage::rdbSave() {
                 std::cout << "The Data is Empty" << std::endl;
                 return;
         }
-        ++tmp;
         // ofstream out;
         // out.open(path,ios::app | ios::out);
         // assert(out.is_open());
@@ -168,10 +167,12 @@ void threadStorage::rdbSave() {
             cout << "Storage path: " << path << endl;
             cout << "rdbsave" << endl;
 
-            fd_ = open(path.c_str(),O_WRONLY | O_APPEND | O_CREAT,0644);
+            fd_ = open(path.c_str(),O_RDWR | O_APPEND | O_CREAT,0644);
             if(fd_ == -1) cout << strerror(errno) << endl;
             assert(fd_ != -1);
             if(fallocate(fd_,0,0,4096*4) == -1) cout << strerror(errno) << endl;
+            mptr_ = static_cast<char*>(mmap(0,4*4096,PROT_READ | PROT_WRITE,MAP_SHARED,fd_,0));
+            assert(mptr_ != MAP_FAILED);
             hasFileFlag_ = true;
         }
         char buf[1024] = {0};
@@ -187,13 +188,14 @@ void threadStorage::rdbSave() {
                              ExpireTime.c_str(),it->first.second,RedisRdbTypeString,(int)it->first.first.size(),
                              it->first.first.c_str(),(int)it->second.size(),it->second.c_str(),Eof,CheckSum);
                     std::cout << "Rdb Structure String: " << buf << std::endl;
-                    write(fd_,buf,strlen(buf));
-                    int len = strlen(buf);
-                    uint64_t t = len;
-                    offsetend_ += len;
-                    t = t << 32 | offsetend_;
-                    keyLocation_.insert(make_pair(it->first.first,t));
-                    keyPath_.insert(make_pair(it->first.first,path));
+                    memcpy(mptr_ + offsetend_,buf,strlen(buf));
+                    // write(fd_,buf,strlen(buf));
+                    // int len = strlen(buf);
+                    // uint64_t t = len;
+                    offsetend_ += strlen(buf);
+                    // t = t << 32 | offsetend_;
+                    // keyLocation_.insert(make_pair(it->first.first,t));
+                    // keyPath_.insert(make_pair(it->first.first,path));
                     memset(buf,0,sizeof(buf));
                     it++;
                 }
@@ -220,7 +222,9 @@ void threadStorage::rdbSave() {
                              it->first.first.c_str(),(int)it->second.size(),tmp,Eof,CheckSum);
 
                     std::cout << "Hash Object: " << buf << std::endl;
-                    write(fd_,buf,strlen(buf));
+                    memcpy(mptr_ + offsetend_,buf,strlen(buf));
+                    // write(fd_,buf,strlen(buf));
+                    offsetend_ += strlen(buf);
                     memset(buf,0,sizeof(buf));
                     it++;
                 }
@@ -245,7 +249,9 @@ void threadStorage::rdbSave() {
                              databaseNum_,ExpireTime.c_str(),it->first.second,RedisRdbTypeList,(int)it->first.first.size(),
                              it->first.first.c_str(),(int)it->second.size(),tmp,Eof,CheckSum);
                     std::cout << "List Object: " << buf << std::endl;
-                    write(fd_,buf,strlen(buf));
+                    // write(fd_,buf,strlen(buf));
+                    memcpy(mptr_ + offsetend_,buf,strlen(buf));
+                    offsetend_ += strlen(buf);
                     memset(buf,0,sizeof(buf));
                     it++;
                 }
@@ -253,10 +259,11 @@ void threadStorage::rdbSave() {
            
             // exit(0);
         }
-        if((hasFileFlag_ && offsetend_ == MaxFile) || tmp == 2) {
+        if(hasFileFlag_ && offsetend_ == MaxFile) {
             cout << "close file" << endl;
-             close(fd_);
-             hasFileFlag_ = false;
+            munmap(mptr_,4*4096);
+            close(fd_);
+            hasFileFlag_ = false;
         }
            
         cout << "Finished" << endl;
