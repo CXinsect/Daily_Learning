@@ -1,5 +1,8 @@
 #include "redisPersistence.h"
+#include "dataBase.h"
 
+int threadStorage::fileId_ = 0;
+// int threadStorage::fd_ = -1;
 void Persistence::parentHandle(int sig) {
 std::cout << "parent process" << std::endl;
 }
@@ -140,23 +143,37 @@ void Persistence::rdbSave () {
 // }
 
 void threadStorage::rdbSave() {
+        unique_lock<mutex> mylock(mutex_);
+       
         if(!database_->getKeySpaceStringObject().size() &&
            !database_->getKeySpaceHashObject().size() &&
            !database_->getKeySpaceListObject().size()) {
                 std::cout << "The Data is Empty" << std::endl;
                 return;
         }
+        ++tmp;
+        // ofstream out;
+        // out.open(path,ios::app | ios::out);
+        // assert(out.is_open());
+        string path;
+        if(!hasFileFlag_) {
+            path = MmapFile::getCwd();
+            // mutex_.lock();
+            incrementFileId();
+            cout << "Cur File ID: " << getCurFileId() << endl;
+            path += intToString(getCurFileId());
+            // mutex_.unlock();
 
-        string path = MmapFile::getCwd();
-        incrementFileId(1);
-        path += intToString(getCurFileId());
-        path += ".rdb";
-        cout << "Storage path: " << path << endl;
-        cout << "rdbsave" << endl;
+            path += ".rdb";
+            cout << "Storage path: " << path << endl;
+            cout << "rdbsave" << endl;
 
-        ofstream out;
-        out.open(path,ios::app | ios::out);
-        assert(out.is_open());
+            fd_ = open(path.c_str(),O_WRONLY | O_APPEND | O_CREAT,0644);
+            if(fd_ == -1) cout << strerror(errno) << endl;
+            assert(fd_ != -1);
+            if(fallocate(fd_,0,0,4096*4) == -1) cout << strerror(errno) << endl;
+            hasFileFlag_ = true;
+        }
         char buf[1024] = {0};
         cout <<"ddd" << endl;
         for(int i = 0; i < dbNums_;i++) {
@@ -166,19 +183,24 @@ void threadStorage::rdbSave() {
                
                 auto it = database_->getKeySpaceStringObject().begin();
                 while(it != database_->getKeySpaceStringObject().end()) {
-                    unique_lock<mutex> mylock(mutex_);
                     snprintf(buf,sizeof(buf),"%s%s%d%s%lld^%hd!%d@%s!%d$%s%d%ld\r\n",FixedStructure.c_str(),Database.c_str(),i,
                              ExpireTime.c_str(),it->first.second,RedisRdbTypeString,(int)it->first.first.size(),
                              it->first.first.c_str(),(int)it->second.size(),it->second.c_str(),Eof,CheckSum);
                     std::cout << "Rdb Structure String: " << buf << std::endl;
-                    out.write(buf,strlen(buf));
+                    write(fd_,buf,strlen(buf));
+                    int len = strlen(buf);
+                    uint64_t t = len;
+                    offsetend_ += len;
+                    t = t << 32 | offsetend_;
+                    keyLocation_.insert(make_pair(it->first.first,t));
+                    keyPath_.insert(make_pair(it->first.first,path));
                     memset(buf,0,sizeof(buf));
                     it++;
                 }
             }
             if(database_->getKeySpaceHashObject().size() != 0){
                 //保存哈希对象
-                unique_lock<mutex> mylock(mutex_);
+                // unique_lock<mutex> mylock(mutex_);
 
                 auto it = database_->getKeySpaceHashObject().begin();
                 memset(buf,0,sizeof(buf));
@@ -198,7 +220,7 @@ void threadStorage::rdbSave() {
                              it->first.first.c_str(),(int)it->second.size(),tmp,Eof,CheckSum);
 
                     std::cout << "Hash Object: " << buf << std::endl;
-                    out.write(buf,strlen(buf));
+                    write(fd_,buf,strlen(buf));
                     memset(buf,0,sizeof(buf));
                     it++;
                 }
@@ -209,7 +231,7 @@ void threadStorage::rdbSave() {
                 memset(buf,0,sizeof(buf));
                auto it = database_->getKeySpaceListObject().begin();
                 while(it != database_->getKeySpaceListObject().end()) {
-                    unique_lock<mutex> mylock(mutex_);                    
+                    // unique_lock<mutex> mylock(mutex_);                    
                     std::list<std::string>::iterator iter = it->second.begin();
                     char tmp[4*1024] = {0};
                     char *ptr = tmp;
@@ -223,7 +245,7 @@ void threadStorage::rdbSave() {
                              databaseNum_,ExpireTime.c_str(),it->first.second,RedisRdbTypeList,(int)it->first.first.size(),
                              it->first.first.c_str(),(int)it->second.size(),tmp,Eof,CheckSum);
                     std::cout << "List Object: " << buf << std::endl;
-                    out.write(buf,strlen(buf));
+                    write(fd_,buf,strlen(buf));
                     memset(buf,0,sizeof(buf));
                     it++;
                 }
@@ -231,7 +253,12 @@ void threadStorage::rdbSave() {
            
             // exit(0);
         }
-        out.close();
+        if((hasFileFlag_ && offsetend_ == MaxFile) || tmp == 2) {
+            cout << "close file" << endl;
+             close(fd_);
+             hasFileFlag_ = false;
+        }
+           
         cout << "Finished" << endl;
          return;
 }

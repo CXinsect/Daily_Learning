@@ -1,34 +1,43 @@
 #ifndef _PERSISTENCE_H_
 #define _PERSISTENCE_H_
 #include "model.h"
-#include "dataBase.h"
+// #include "dataBase.h"
 #include "./util/status.h"
 #include "threadpool.h"
 #include <mutex>
 #include <atomic>
 #include "File.h"
 #include <algorithm>
+#include <unordered_map>
+
+class DataBase;
 
 using namespace std;
-
 class threadStorage : public Task {
     public:
        
-        threadStorage(shared_ptr<DataBase>&db,int dbNum):database_(db),fileId_(0),dbNums_(dbNum) {
+        threadStorage(shared_ptr<DataBase>&db,int dbNum):database_(db),dbNums_(dbNum) {
          }
-         ~threadStorage() {}
+       ~threadStorage() { }
         void rdbSave();
         void Run() { CheckStorageConditions(); }
         void print(); 
         void setDataBase(shared_ptr<DataBase>& db) {
             database_ = db;
         }
+         static int fileId_;
+    
     private:
-        int incrementFileId (int inc) {
-            fileId_ += inc;
+        int incrementFileId () {
+            // unique_lock<mutex> mylock(mutex_);
+            ++fileId_;
+            std::cout << "why" << fileId_ << endl;
             return fileId_;
         }
-        int getCurFileId() { return fileId_; }
+        int getCurFileId() { 
+            // unique_lock<mutex> mylock(mutex_);            
+            return fileId_; 
+        }
         
         string intToString (int t) {
             string s = "";
@@ -49,10 +58,50 @@ class threadStorage : public Task {
              assert(gettimeofday(&tv, NULL) != -1);
              return tv.tv_sec;
          }
+
+         void setOffset(int size) { offsetend_ = size; }
     private:
-        atomic<int> fileId_;
+        // int fileId_;
         mutex mutex_;   
+        int offsetend_;
+        uint64_t location_;
         shared_ptr<DataBase> database_;
+        unordered_map<string,uint64_t> keyLocation_;
+        unordered_map<string,string> keyPath_;
+        bool hasFileFlag_ = false;
+        int fd_ = -1;
+        int tmp = 0;
+        
+    public:
+        string findFileEntries(string key) {
+            auto it = keyPath_.find(key);
+            if(it != keyPath_.end()) {
+                int fd = open(it->second.c_str(),O_RDONLY,0644);
+                if(fd != -1) {
+                    struct stat st;
+                    assert(stat(it->second.c_str(),&st) != -1);
+                    char*p = static_cast<char*>(mmap(0,st.st_size,PROT_READ,MAP_SHARED,fd,0));
+                
+                    auto iter = keyLocation_.find(key);
+                    if(iter != keyLocation_.end()) {
+                        int len = iter->second >> 32;
+                        int offset = iter->second & 0xFFFFFFFF;
+                        
+                    }    
+                }
+                
+                else {
+                    cout << "file open error[persistence]: " << __LINE__ <<endl;
+                    exit(0);
+                }
+            }
+        }
+
+        void Close() {
+            cout << "close" << endl;
+            close(fd_);
+        }
+    
     private:
         public:
         //Rdb的数据结构

@@ -4,6 +4,8 @@
 #include "./util/status.h"
 #include "LRU.h"
 
+class redisPersistence;
+
 using namespace std;
 using namespace _Redis;
 
@@ -84,4 +86,6 @@ private:
   LRUCache<string, string> stringLru_;
   LRUCache<string, multimap<string,string> > hashLru_;
   LRUCache<string, list<string> > listLRu_;
+
+  weak_ptr<redisPersistence> storage_;
 };

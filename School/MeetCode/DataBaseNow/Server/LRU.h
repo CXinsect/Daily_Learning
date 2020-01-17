@@ -29,10 +29,10 @@ class LRUCache {
             head->next = tail;
             tail->pre = head;
         }
-        int get (T1 key) {
+        string get (T1 key) {
             auto ret = cache.find(key);
             if(ret == cache.end()) {
-                return -1;
+                return "";
             } else {
                 moveToHead(&ret->second);
                 return ret->second.value;

@@ -29,17 +29,22 @@ class ThreadPool {
         void processTask () {
             while(!stoped_) {
                 unique_lock<mutex> mylock (mutex_);
-                cond_.wait(mylock,[this] { if(queue_.empty()) return false; else return true; });
+                cond_.wait(mylock,[this] { if(queue_.empty() && !isStoped()) return false; else return true; });
+                // cond_.wait(mylock);
+                if(queue_.empty()) continue;
                 Task* task = queue_.front();
                 queue_.pop();
                 if(task == nullptr) continue;
                 mylock.unlock();
+                this_thread::sleep_for(chrono::milliseconds(500));
                 task->Run();
+
                 mutex_.lock();
                 if(!isStoped()) delete task;
                 mutex_.unlock();
                 
             }
+            cout << "hello linux" << endl;
         }
         void Start() {
             cout << "开始创建线程 " << endl;
@@ -53,7 +58,7 @@ class ThreadPool {
             cond_.notify_all();
             for(auto &i:thread_) i.join();
             while(!queue_.empty()) {
-                this_thread::sleep_for(chrono::milliseconds(500s));
+                this_thread::sleep_for(chrono::milliseconds(500));
             }
             unique_lock<mutex> mylock(mutex_);
             while(!queue_.empty()) {

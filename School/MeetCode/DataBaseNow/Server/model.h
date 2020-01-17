@@ -117,4 +117,5 @@ class Io {
     static size_t readn(int sockfd,char*buf,ssize_t count);
 };
 
+const int MaxFile = 4096 * 4;
 #endif
