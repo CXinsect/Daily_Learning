@@ -31,19 +31,21 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-
+#include <unordered_map>
 #include <boost/scoped_ptr.hpp>
+
 using namespace::std::placeholders;
-// #include <unility>
+using namespace std;
+
 namespace DataStructure {
 
 typedef struct _redisObject {
   unsigned type : 4;
   unsigned encoding : 4;
-  std::string data;
+  string string_;
+  unordered_map<string,string> dict_;
+  list<string> list_;
 } redisObject;
-
-typedef std::function<void()> CommandCallBack;
 
 //对象
 const int ObjString = 0;
@@ -58,9 +60,7 @@ const int EncodingLinkedList = 3;
 const int NoEvent = 0;
 const int ReadEvent = 1;
 const int WriteEvent = 2;
-//事件
-const int FileEvents = 3;
-const int TimeEvents = 4;
+
 //网络配置
 const int Port = 8888;
 const std::string Ip = "127.0.0.1";
@@ -72,41 +72,8 @@ const std::string SpareTire = "SPACE";
 const int RedisMaster = 0;
 const int RedisSlave = 1;
 const long long DefaultTime = 2038;
-//客户端状态
- typedef struct _clientState {
-   int cfd;
-   std::string name;
-   int flags_;
-   int db_index;
-   std::vector <std::string> argv;
-   int argc;
-   int authentication;
- }clientState;
 
-typedef struct _cmdTable {
-
-  public:
-    // void setMember(const std::string&_name,
-    //            std::function<void(const std::string&,const std::string&,
-    //                              const std::string&,const std::string&)> _callback,
-    //              int _argc,int _sflags,int _flags,int _calls)
-    // {
-    //   name = _name;
-    //   callback = _callback;
-    //   argc = _argc;
-    //   sflags = _sflags;
-    //   flags = _flags;
-    //   calls = _calls;
-    // }
-    std::string name;
-    std::function<const std::string (const std::string&,const std::string&,
-                          const std::string&,const std::string&,
-                          const std::string&,const std::string&)> callback;
-    int argc;
-    std::string  sflags;
-    int flags;
-    int calls;
-}cmdTable;
+typedef std::function<void(std::vector<std::string>&)> callback;
 
 class Accept;
 typedef std::shared_ptr<Accept> AcceptorPtr;

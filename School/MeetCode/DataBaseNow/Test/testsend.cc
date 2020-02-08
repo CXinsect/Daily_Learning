@@ -3,7 +3,7 @@
 #include <sstream>
 
 int main (void) {
-    // char buf[1024];
+    char buf[1024];
     // while(1) {
     //     fgets(buf,sizeof(buf),stdin);
     //     std::istringstream str(buf);

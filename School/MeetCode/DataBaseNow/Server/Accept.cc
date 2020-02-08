@@ -34,7 +34,6 @@ void Accept::handleRead () {
     ssize_t n = input_.readFd(channelAccepted_->getSockfd());
     std::cout << "length: " << n << std::endl;
     if(n > 0) {
-        // shared_from_this()->test();
         messagecallback_(shared_from_this(),&input_,n);
     } else if(n == 0)
         handleClose();

@@ -2,33 +2,26 @@
 #include "File.h"
 #include "redisPersistence.h"
 
-// #include "LRU.h"
-
 bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
                            const std::string &value, const std::string &value1,
                            long long expiresTime)
 {
-  type_ = type;
-  encoding_ = encoding;
-  key_ = key;
-  value_ = value;
-  value1_ = value1;
   int tempTime = expiresTime + getTimestamp();
   if (type_ == DataStructure::ObjString)
   {
     SMap::iterator Siter = sMap_.find(key);
     if (Siter == sMap_.end())
     {
-      String_.insert(make_pair(make_pair(key, tempTime), value_));
+      String_.insert(make_pair(key, value));
       sMap_.insert(make_pair(key, tempTime));
       stringLru_.set(key, value);
     }
     else
     {
-      String_.erase({key, sMap_[key]});
+      String_.erase(key);
       sMap_.erase(key);
       sMap_.insert(make_pair(key, tempTime));
-      String_.insert(make_pair(make_pair(key_, tempTime), value_));
+      String_.insert(make_pair(key, value));
       stringLru_.set(key, value);
     }
   }
@@ -38,15 +31,15 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
     if (Hiter == hMap_.end())
     {
       std::multimap<std::string, std::string> tmp;
-      tmp.insert(make_pair(value_, value1_));
-      Hash_.insert(make_pair(make_pair(key_, tempTime), tmp));
+      tmp.insert(make_pair(value, value1));
+      Hash_.insert(make_pair(key, tmp));
       hMap_.insert(make_pair(key, tempTime));
       hashLru_.set(key, tmp);
     }
     else
     {
       std::multimap<std::string, std::string> tmp;
-      Hash::iterator it = Hash_.find({key, hMap_[key]});
+      Hash::iterator it = Hash_.find(key);
       std::multimap<std::string, std::string>::iterator iter = it->second.begin();
       while (iter != it->second.end())
       {
@@ -55,9 +48,9 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       }
       tmp.insert(make_pair(value, value1));
       std::cout << "rmp: " << tmp.size() << std::endl;
-      Hash_.erase({key, hMap_[key]});
+      Hash_.erase(key);
       hMap_.erase(key);
-      Hash_.insert(make_pair(make_pair(key, tempTime), tmp));
+      Hash_.insert(make_pair(key, tmp));
       hMap_.insert(make_pair(key, tempTime));
       hashLru_.set(key, tmp);
     }
@@ -69,15 +62,15 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
     if (lIter == lMap_.end())
     {
       std::list<std::string> tmp;
-      tmp.push_back(value_);
-      List_.insert(make_pair(make_pair(key_, tempTime), tmp));
+      tmp.push_back(value);
+      List_.insert(make_pair(key, tmp));
       lMap_.insert(make_pair(key, tempTime));
       listLRu_.set(key, tmp);
     }
     else
     {
       //更新list的值
-      auto it = List_.find({key, lIter->second});
+      auto it = List_.find(key);
       std::list<std::string>::iterator iter = it->second.begin();
       std::list<std::string> tmp;
       while (iter != it->second.end())
@@ -85,11 +78,10 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
         tmp.push_back(*iter);
         iter++;
       }
-      tmp.push_back(value_);
-      List_.erase({key, lMap_[key]});
+      tmp.push_back(value);
+      List_.erase(key);
       lMap_.erase(key);
-      std::cout << "ListObject size: " << tmp.size() << std::endl;
-      List_.insert(make_pair(make_pair(key_, tempTime), tmp));
+      List_.insert(make_pair(key, tmp));
       lMap_.insert(make_pair(key, tempTime));
       listLRu_.set(key, tmp);
     }
@@ -109,7 +101,7 @@ bool DataBase::delKeySpace(int type, const std::string &key)
     SMap ::iterator hIter = sMap_.find(key);
     if (hIter != sMap_.end())
     {
-      String_.erase({key, sMap_[key]});
+      String_.erase(key);
       return true;
     }
     else
@@ -122,7 +114,7 @@ bool DataBase::delKeySpace(int type, const std::string &key)
     HMap::iterator hIter = hMap_.find(key);
     if (hIter != hMap_.end())
     {
-      Hash_.erase({key, hMap_[key]});
+      Hash_.erase(key);
       return true;
     }
   }
@@ -131,7 +123,7 @@ bool DataBase::delKeySpace(int type, const std::string &key)
     LMap::iterator lIter = lMap_.find(key);
     if (lIter != lMap_.end())
     {
-      List_.erase({key, lMap_[key]});
+      List_.erase(key);
       return true;
     }
   }
@@ -147,10 +139,15 @@ const std::string DataBase::delListObject(const std::string &key)
   auto lIter = lMap_.find(key);
   if (lIter != lMap_.end())
   {
-    auto it = List_.find({key, lIter->second});
-    std::string res = it->second.back();
-    it->second.pop_back();
-    return res;
+    auto it = List_.find(key);
+    if(it != List_.end()) {
+      std::string res = it->second.back();
+      cout << "res: " << res << key << endl;
+      it->second.pop_back();
+      return res;
+    } else {
+      return Status::NotFound("Not Found key | has been deleted").ToString();
+    }
   }
   else
   {
@@ -171,7 +168,7 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
         }
         else
         {
-          auto it = String_.find({key, sIter->second});
+          auto it = String_.find(key);
           ret = '+' + it->second;
         }
     }
@@ -187,7 +184,7 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
       {
         char buf[1024] = {0};
         char *pbuf = buf;
-        auto it = Hash_.find({key, hIter->second});
+        auto it = Hash_.find(key);
         int n = 0, len = 0;
         for (auto iter = it->second.begin(); iter != it->second.end();
              iter = it->second.upper_bound(iter->first))
@@ -201,20 +198,6 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
             len += n;
           }
         }
-        //            while(iter != it->second.begin()) {
-        //                if(tmpcount--)
-        //                    iter = --it->second.end();
-        //                else iter--;
-        //                int count = it->second.count(iter->first);
-        //                auto miter = it->second.find(iter->first);
-        //                while(count) {
-        //                    std::cout << "test " << miter->first << ": " << miter->second << std::endl;
-        //                    n = snprintf(pbuf+n,sizeof(buf)-len,"%s %s ",miter->first.c_str(),miter->second.c_str());
-        //                    len += n;
-        //                    count--;
-        //                    miter++;
-        //                }
-        //            }
         ret = buf;
         string t = "+";
         ret = t + ret;
@@ -231,7 +214,7 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
       }
       else
       {
-        auto it = List_.find({key, lIter->second});
+        auto it = List_.find(key);
         std::list<std::string>::iterator iter = it->second.begin();
         ret = '+' + *iter;
       }
@@ -307,116 +290,117 @@ bool DataBase::judgeKeySpaceExpiresTime(int type, const std::string &key)
 }
 void DataBase::rdbLoad()
 {
-  char buf[2 * 1024] = {0};
-  std::string path = getcwd(buf, sizeof(buf));
-  path += "/1.rdb";
-  struct stat stat_;
-  int ret = ::stat(path.c_str(), &stat_);
-  if (ret < 0)
-  {
-    cout << strerror(errno) << endl;
-  }
-  MmapFile mfile(static_cast<int>(stat_.st_size), path);
-
-  mfile.MmapOpen();
-  std::ifstream in;
-  // in.open(path, std::ios::in);
-  //if opening is successful
-  // if (in.is_open()) {
-  //   while (!in.eof()) {
-  //     in.read(buf, sizeof(buf));
-  //   }
-  //   std::cout << "data in buffer: " << buf << std::endl;
+  // char buf[2 * 1024] = {0};
+  // std::string path = getcwd(buf, sizeof(buf));
+  // path += "/1.rdb";
+  // struct stat stat_;
+  // int ret = ::stat(path.c_str(), &stat_);
+  // if (ret < 0)
+  // {
+  //   cout << strerror(errno) << endl;
   // }
-  // in.close();
+  // MmapFile mfile(static_cast<int>(stat_.st_size), path);
 
-  std::string data(mfile.getFilePtr(), mfile.getFilePtr() + mfile.getFileSize());
-  // string data = buf;
-  std::cout << "data: " << data << data.size() << std::endl;
-  int pos;
-  while (data.size())
-  {
-    ret = data.find("FE");
-    pos = data.find("FD");
-    cout << pos << ret << endl;
-    db_num_ = atoi(InterceptString(data, ret + 8, pos).c_str());
-    ret = data.find_first_of('^');
-    long long expiresTime_ = atoi(InterceptString(data, pos + 10, ret).c_str());
-    pos = data.find_first_of('!');
-    type_ = atoi(InterceptString(data, ret + 1, pos).c_str());
-    std::cout << "Type: " << type_ << std::endl;
-    if (type_ == DataStructure::ObjString)
-    {
-      ret = data.find_first_of('@');
-      mkLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
-      key_ = data.substr(ret + 1, mkLen_);
-      pos = data.find('!', ret);
-      ret = data.find('$', pos);
-      valueLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
-      value_ = data.substr(ret + 1, valueLen_);
-      String_.insert(make_pair(make_pair(key_, expiresTime_), value_));
-      // update string
-      pos = data.find_first_of('\n');
-      ret = data.find('\n', pos + 1);
-      int len = InterceptString(data, pos + 1, ret + 1).size();
-      data = data.substr(pos + 1, 94);
-      continue;
-    }
-    if (type_ == DataStructure::ObjHash)
-    {
-      std::multimap<std::string, std::string> tmp;
-      ret = data.find_first_of('#');
-      mkLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
-      key_ = data.substr(ret + 1, mkLen_);
-      pos = data.find('!', ret);
-      // Skip hash size
-      ret = data.find('!', pos + 1);
-      pos = data.find('@', ret);
-      while (ret != -1 && pos != -1)
-      {
-        skeyLen_ = atoi(InterceptString(data, ret + 1, pos).c_str());
-        skey_ = data.substr(pos + 1, skeyLen_);
-        ret = data.find('!', pos);
-        pos = data.find('$', ret);
-        valueLen_ = atoi(InterceptString(data, ret + 1, pos).c_str());
-        value_ = data.substr(pos + 1, valueLen_);
-        tmp.insert(make_pair(skey_, value_));
-        ret = data.find('!', pos + 1);
-        pos = data.find('@', ret);
-      }
-      Hash_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
-      // update string
-      pos = data.find_first_of('\n');
-      ret = data.find('\n', pos + 1);
-      int len = InterceptString(data, pos + 1, ret + 1).size();
-      data = data.substr(pos + 1, data.size());
-      continue;
-    }
-    if (type_ == DataStructure::ObjList)
-    {
-      ret = data.find_first_of('@');
-      mkLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
-      key_ = data.substr(ret + 1, mkLen_);
-      pos = data.find('!', ret);
-      ret = data.find('!', pos + 1);
-      ListSize_ = atoi(InterceptString(data, pos + 1, ret).c_str());
-      std::list<std::string> tmp;
-      while (ListSize_-- > 0)
-      {
-        pos = data.find('$', ret);
-        valueLen_ = atoi(InterceptString(data, ret + 1, pos).c_str());
-        value_ = data.substr(pos + 1, valueLen_);
-        tmp.push_back(value_);
-        ret = data.find('!', pos);
-      }
-      List_.insert(make_pair(make_pair(key_, expiresTime_), tmp));
-      // update string
-      pos = data.find_first_of('\n');
-      ret = data.find('\n', pos + 1);
-      int len = InterceptString(data, pos + 1, ret + 1).size();
-      data = data.substr(pos + 1, data.size());
-      continue;
-    }
-    std::cout << "Finally: " << data << std::endl;
-  }
+  // mfile.MmapOpen();
+  // std::ifstream in;
+  // // in.open(path, std::ios::in);
+  // //if opening is successful
+  // // if (in.is_open()) {
+  // //   while (!in.eof()) {
+  // //     in.read(buf, sizeof(buf));
+  // //   }
+  // //   std::cout << "data in buffer: " << buf << std::endl;
+  // // }
+  // // in.close();
+
+  // std::string data(mfile.getFilePtr(), mfile.getFilePtr() + mfile.getFileSize());
+  // // string data = buf;
+  // std::cout << "data: " << data << data.size() << std::endl;
+  // int pos;
+  // while (data.size())
+  // {
+  //   ret = data.find("FE");
+  //   pos = data.find("FD");
+  //   cout << pos << ret << endl;
+  //   db_num_ = atoi(InterceptString(data, ret + 8, pos).c_str());
+  //   ret = data.find_first_of('^');
+  //   long long expiresTime_ = atoi(InterceptString(data, pos + 10, ret).c_str());
+  //   pos = data.find_first_of('!');
+  //   type_ = atoi(InterceptString(data, ret + 1, pos).c_str());
+  //   std::cout << "Type: " << type_ << std::endl;
+  //   if (type_ == DataStructure::ObjString)
+  //   {
+  //     ret = data.find_first_of('@');
+  //     mkLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
+  //     string key = data.substr(ret + 1, mkLen_);
+  //     pos = data.find('!', ret);
+  //     ret = data.find('$', pos);
+  //     valueLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
+  //     string value = data.substr(ret + 1, valueLen_);
+  //     String_.insert(make_pair(key, value));
+  //     // update string
+  //     pos = data.find_first_of('\n');
+  //     ret = data.find('\n', pos + 1);
+  //     int len = InterceptString(data, pos + 1, ret + 1).size();
+  //     data = data.substr(pos + 1, 94);
+  //     continue;
+  //   }
+  //   if (type_ == DataStructure::ObjHash)
+  //   {
+  //     std::multimap<std::string, std::string> tmp;
+  //     ret = data.find_first_of('#');
+  //     int mkLen = atoi(InterceptString(data, pos + 1, ret).c_str());
+  //     string key = data.substr(ret + 1, mkLen_);
+  //     pos = data.find('!', ret);
+  //     // Skip hash size
+  //     ret = data.find('!', pos + 1);
+  //     pos = data.find('@', ret);
+  //     while (ret != -1 && pos != -1)
+  //     {
+  //       skeyLen_ = atoi(InterceptString(data, ret + 1, pos).c_str());
+  //       string skey_ = data.substr(pos + 1, skeyLen_);
+  //       ret = data.find('!', pos);
+  //       pos = data.find('$', ret);
+  //       valueLen_ = atoi(InterceptString(data, ret + 1, pos).c_str());
+  //       string value_ = data.substr(pos + 1, valueLen_);
+  //       tmp.insert(make_pair(skey_, value_));
+  //       ret = data.find('!', pos + 1);
+  //       pos = data.find('@', ret);
+  //     }
+
+  //     Hash_.insert(make_pair(key_, tmp));
+  //     // update string
+  //     pos = data.find_first_of('\n');
+  //     ret = data.find('\n', pos + 1);
+  //     int len = InterceptString(data, pos + 1, ret + 1).size();
+  //     data = data.substr(pos + 1, data.size());
+  //     continue;
+  //   }
+  //   if (type_ == DataStructure::ObjList)
+  //   {
+  //     ret = data.find_first_of('@');
+  //     mkLen_ = atoi(InterceptString(data, pos + 1, ret).c_str());
+  //     key_ = data.substr(ret + 1, mkLen_);
+  //     pos = data.find('!', ret);
+  //     ret = data.find('!', pos + 1);
+  //     ListSize_ = atoi(InterceptString(data, pos + 1, ret).c_str());
+  //     std::list<std::string> tmp;
+  //     while (ListSize_-- > 0)
+  //     {
+  //       pos = data.find('$', ret);
+  //       valueLen_ = atoi(InterceptString(data, ret + 1, pos).c_str());
+  //       value_ = data.substr(pos + 1, valueLen_);
+  //       tmp.push_back(value_);
+  //       ret = data.find('!', pos);
+  //     }
+  //     List_.insert(make_pair(key_, tmp));
+  //     // update string
+  //     pos = data.find_first_of('\n');
+  //     ret = data.find('\n', pos + 1);
+  //     int len = InterceptString(data, pos + 1, ret + 1).size();
+  //     data = data.substr(pos + 1, data.size());
+  //     continue;
+  //   }
+  //   std::cout << "Finally: " << data << std::endl;
+  // }
 }

@@ -12,14 +12,12 @@ using namespace _Redis;
 class DataBase {
  public:
   DataBase(){};
-  DataBase(int db_num) : db_num_(db_num) {
-    
-  }
+  DataBase(int db_num) : db_num_(db_num) { }
 
  public:
-  typedef std::map<std::pair<std::string, long long>, std::string> String;
-  typedef std::map<std::pair<std::string, long long>, std::multimap<std::string, std::string>> Hash;
-  typedef std::map<std::pair<std::string, long long>, std::list<std::string>> List;
+  typedef unordered_map<std::string, std::string> String;
+  typedef unordered_map<std::string, std::multimap<std::string, std::string>> Hash;
+  typedef unordered_map<std::string, std::list<std::string>> List;
   const long long DefaultTime = -2038;
   void rdbLoad();
   bool addKeySpace(int type, int encoding, const std::string &key,
@@ -62,19 +60,20 @@ class DataBase {
   int type_;
   int encoding_;
   int db_num_;
-  std::string key_;
+  // std::string key_;
   int mkLen_;
-  std::string skey_;
+  // std::string skey_;
   int skeyLen_;
-  std::string value_;
+  // std::string value_;
   int valueLen_;
-  std::string value1_;
+  // std::string value1_;
   int ListSize_;
   //键空间中的实际对象
   String String_;
   Hash Hash_;
   List List_;
 private:
+//过期时间
   typedef unordered_map<string, long long> SMap;
   typedef unordered_map<string, long long> HMap;
   typedef unordered_map<string, long long> LMap;

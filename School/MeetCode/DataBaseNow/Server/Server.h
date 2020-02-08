@@ -7,6 +7,8 @@
 #include "redisPersistence.h"
 
 #include "./util/status.h"
+#include "dataBase.h"
+#include <unordered_map>
 
 using namespace _Redis;
 
@@ -23,17 +25,17 @@ class Server {
             Init();
         }
     private:
-        const std::string getCommand(const std::string&);
-        const std::string setCommand(const std::string&,const std::string&);
-        const std::string bgsaveCommand();
-        const std::string delCommand(const std::string&);
-        const std::string selectCommand(const std::string&);
-        const std::string expireTimeCommand(const std::string&,const std::string&);
-        const std::string rpushCommand(const std::string&, const std::string&);
-        const std::string rpopCommand(const std::string&);
-        const std::string hsetCommand(const std::string&,const std::string&,const std::string&);
-        const std::string hgetCommand(const std::string&);
-        const std::string hgetallCommand();
+        const std::string getCommand(const vector<string>&);
+        const std::string setCommand(const vector<string>&);
+        const std::string bgsaveCommand(const vector<string>&);
+        const std::string delCommand(const vector<string>&);
+        const std::string selectCommand(const vector<string>&);
+        const std::string expireTimeCommand(const vector<string>&);
+        const std::string rpushCommand(const vector<string>&);
+        const std::string rpopCommand(const vector<string>&);
+        const std::string hsetCommand(const vector<string>&);
+        const std::string hgetCommand(const vector<string>&);
+        const std::string hgetallCommand(const vector<string>&);
         static void endDataBase(DataBase *) { ; }
     public:
         void Init() {
@@ -49,17 +51,17 @@ class Server {
             std::weak_ptr<Persistence> pbase(std::shared_ptr<Persistence>(new Persistence (tmp,db_len_)));
             persistence_ = pbase;
             //init command table
-            cmdtable_.push_back({"get",std::bind(&Server::getCommand,this,_1),2,"rF",0});
-            cmdtable_.push_back({"set",std::bind(&Server::setCommand,this,_1,_2),4,"wm",0});
-            cmdtable_.push_back({"bgsave",std::bind(&Server::bgsaveCommand,this),1,"as",0});
-            cmdtable_.push_back({"del",std::bind(&Server::delCommand,this,_1),2,"w",0});
-            cmdtable_.push_back({"select",std::bind(&Server::selectCommand,this,_1),3,"lF",0});
-            cmdtable_.push_back({"expire",std::bind(&Server::expireTimeCommand,this,_1,_2),3,"wF",0});
-            cmdtable_.push_back({"rpush",std::bind(&Server::rpushCommand,this,_1,_2),3,"wm",0});
-            cmdtable_.push_back({"rpop",std::bind(&Server::rpopCommand,this,_1),2,"wm",0});
-            cmdtable_.push_back({"hset",std::bind(&Server::hsetCommand,this,_1,_2,_3),4,"wm",0});
-            cmdtable_.push_back({"hget",std::bind(&Server::hgetCommand,this,_1),2,"wm",0});
-            cmdtable_.push_back({"hgetall",std::bind(&Server::hgetallCommand,this),2,"wm",0});
+            cmdtable_.insert(make_pair("get",std::bind(&Server::getCommand,this,_1)));
+            cmdtable_.insert(make_pair("set",std::bind(&Server::setCommand,this,_1)));
+            cmdtable_.insert(make_pair("bgsave",std::bind(&Server::bgsaveCommand,this,_1)));
+            cmdtable_.insert(make_pair("del",std::bind(&Server::delCommand,this,_1)));
+            cmdtable_.insert(make_pair("select",std::bind(&Server::selectCommand,this,_1)));
+            cmdtable_.insert(make_pair("expire",std::bind(&Server::expireTimeCommand,this,_1)));
+            cmdtable_.insert(make_pair("rpush",std::bind(&Server::rpushCommand,this,_1)));
+            cmdtable_.insert(make_pair("rpop",std::bind(&Server::rpopCommand,this,_1)));
+            cmdtable_.insert(make_pair("hset",std::bind(&Server::hsetCommand,this,_1)));
+            cmdtable_.insert(make_pair("hget",std::bind(&Server::hgetCommand,this,_1)));
+            cmdtable_.insert(make_pair("hgetall",std::bind(&Server::hgetallCommand,this,_1)));
         }
         void onConnection(const AcceptorPtr& conn);
         void onMessage(const AcceptorPtr& conn,Buffer *buf,ssize_t n);
@@ -70,8 +72,8 @@ class Server {
     private:
         EventLoop *loop_;
         std::shared_ptr<Accept> accept_;
-        std::vector <clientState> client_;
-        std::vector<cmdTable> cmdtable_;
+        unordered_map <string,function<string(const vector<string>&)>> cmdtable_;
+        
         int db_index_  = -1;
         int db_len_;
         int max_index_ = 16;
